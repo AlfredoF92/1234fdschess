@@ -45,6 +45,10 @@
 	padding-bottom: 0;
 }
 
+.bmchess-header-root .topbar {
+	justify-content: flex-start;
+}
+
 .bmchess-header-root .app-menu-btn svg {
 	display: block;
 }

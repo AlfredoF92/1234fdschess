@@ -6,15 +6,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="bmchess-root bmchess-header-root">
   <div class="page">
     <header class="topbar">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">
-          <img src="<?php echo esc_url( $game_url . 'img/logo.svg' ); ?>" alt="">
-        </span>
-        <div>
-          <strong data-i18n="brand.name">BM Chess</strong>
-          <span data-i18n="brand.tagline">Trova la mossa migliore!</span>
-        </div>
-      </div>
       <nav class="quick-bar" data-i18n-aria="quick.aria" aria-label="Quick games">
         <button type="button" id="quick-train" class="quick-btn is-primary" data-i18n="newgame.menu" data-i18n-title="quick.trainHint" title="Training from the starting position">Start a new game</button>
         <button type="button" id="quick-train-12" class="quick-btn" data-i18n="quick.train12" data-i18n-title="quick.train12Hint" title="Training after 12 moves">12 moves</button>
