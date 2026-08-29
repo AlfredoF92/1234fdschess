@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: BMChess
- * Description: Gioco BM Chess in WordPress. Shortcode: [bm-chess-home]
- * Version: 1.0.0
+ * Description: Gioco BM Chess in WordPress. Shortcode: [header-menu] [bm-chess-home]
+ * Version: 1.0.1
  * Author: BM Chess
  * Text Domain: bmchess
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BMCHESS_VERSION', '1.0.0' );
+define( 'BMCHESS_VERSION', '1.0.1' );
 define( 'BMCHESS_FILE', __FILE__ );
 define( 'BMCHESS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BMCHESS_URL', plugin_dir_url( __FILE__ ) );
@@ -25,7 +25,8 @@ function bmchess_post_has_shortcode( $post = null ) {
 	if ( ! $post || empty( $post->post_content ) ) {
 		return false;
 	}
-	return has_shortcode( $post->post_content, 'bm-chess-home' );
+	return has_shortcode( $post->post_content, 'bm-chess-home' )
+		|| has_shortcode( $post->post_content, 'header-menu' );
 }
 
 function bmchess_should_enqueue() {
@@ -114,3 +115,16 @@ function bmchess_render_home( $atts = array() ) {
 }
 
 add_shortcode( 'bm-chess-home', 'bmchess_render_home' );
+
+function bmchess_render_header_menu( $atts = array() ) {
+	$GLOBALS['bmchess_shortcode_used'] = true;
+	bmchess_enqueue_assets();
+
+	$game_url = bmchess_game_url();
+	ob_start();
+	echo '<script>' . bmchess_boot_script() . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	include BMCHESS_DIR . 'templates/header-menu.php';
+	return ob_get_clean();
+}
+
+add_shortcode( 'header-menu', 'bmchess_render_header_menu' );

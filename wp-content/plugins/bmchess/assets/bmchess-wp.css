@@ -41,6 +41,14 @@
 	min-height: 0;
 }
 
+.bmchess-header-root {
+	padding-bottom: 0;
+}
+
+.bmchess-header-root .app-menu-btn svg {
+	display: block;
+}
+
 body.bmchess-has-game .wp-block-post-title,
 body.bmchess-has-game .wp-block-post-featured-image {
 	display: none;
