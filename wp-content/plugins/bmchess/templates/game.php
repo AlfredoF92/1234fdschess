@@ -345,8 +345,54 @@ if ( ! defined( 'ABSPATH' ) ) {
         </label>
         <p id="opening-line" class="opening-line">Starting from the initial position.</p>
       </div>
-      <div id="panel-online" class="new-game-panel" role="tabpanel" data-panel="online" aria-labelledby="tab-online" hidden>
-        <p class="new-game-soon" data-i18n="soon.online">Coming soon. You will be able to play online against other players.</p>
+      <div id="panel-online" class="new-game-panel new-game-form" role="tabpanel" data-panel="online" aria-labelledby="tab-online" hidden>
+        <div id="online-setup">
+          <p class="new-game-soon" data-i18n="online.intro">Crea una partita e manda il link a un amico.</p>
+          <label class="skill-wrap">
+            <span data-i18n="newgame.color">Play as</span>
+            <select id="online-color" data-i18n-aria="newgame.colorAria" aria-label="Your color">
+              <option value="random" selected>Random</option>
+              <option value="w">White</option>
+              <option value="b">Black</option>
+            </select>
+          </label>
+          <label class="skill-wrap">
+            <span data-i18n="clock.label">Time per move</span>
+            <select id="online-clock" data-i18n-aria="clock.settingAria" aria-label="Time per move">
+              <option value="0" selected>Unlimited</option>
+              <option value="10">10 seconds</option>
+              <option value="30">30 seconds</option>
+              <option value="45">45 seconds</option>
+              <option value="60">1 minute</option>
+            </select>
+          </label>
+          <label class="skill-wrap">
+            <span data-i18n="online.cards">Mostra le cards</span>
+            <select id="online-cards" data-i18n-aria="online.cardsAria" aria-label="Show move cards">
+              <option value="1" selected>Yes</option>
+              <option value="0">No</option>
+            </select>
+          </label>
+          <label class="skill-wrap" id="online-layout-row">
+            <span data-i18n="hints.layout">Suggested moves</span>
+            <select id="online-layout" data-i18n-aria="hints.layoutAria" aria-label="Number of suggested moves">
+              <option value="6x1" selected>The 6 best moves</option>
+              <option value="4x1">The 4 best moves</option>
+              <option value="6x2">2 blocks of 6</option>
+              <option value="4x2">2 blocks of 4</option>
+            </select>
+          </label>
+          <button type="button" id="btn-online-create" class="is-primary online-create" data-i18n="online.create">Crea link</button>
+        </div>
+        <div id="online-share" hidden>
+          <p class="new-game-soon" data-i18n="online.shareHint">Invia questo link all’amico. Quando apre la pagina, la partita inizia.</p>
+          <label class="skill-wrap">
+            <span data-i18n="online.link">Link della partita</span>
+            <input id="online-link" type="text" readonly>
+          </label>
+          <button type="button" id="btn-online-copy" data-i18n="online.copy">Copia link</button>
+          <p id="online-wait" class="opening-line" data-i18n="online.wait">In attesa dell’avversario…</p>
+        </div>
       </div>
       <div id="panel-friend" class="new-game-panel new-game-form" role="tabpanel" data-panel="friend" aria-labelledby="tab-friend" hidden>
         <label class="skill-wrap">

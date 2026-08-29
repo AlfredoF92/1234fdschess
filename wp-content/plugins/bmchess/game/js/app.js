@@ -3300,6 +3300,13 @@ function visibleHintDests() {
 }
 
 function boardHintPlayReady() {
+  if (isOnlineVsHuman() && !state.onlineShowCards) {
+    return Boolean(state.board)
+      && playerIsSideToMove()
+      && !state.busy
+      && !state.game.game_over()
+      && state.onlineStatus === "playing";
+  }
   return Boolean(state.board)
     && hintsArePlayable()
     && hintPanelOpen()
@@ -3364,6 +3371,13 @@ function previewFromBoardCursor() {
 }
 
 function playHintMove(from, to) {
+  if (isOnlineVsHuman() && !state.onlineShowCards) {
+    if (!playerIsSideToMove() || state.busy || state.onlineStatus !== "playing") return;
+    const legal = state.game.moves({ square: from, verbose: true }).find((move) => move.to === to);
+    if (!legal) return;
+    applyUserMove(from, to, legal.promotion, null);
+    return;
+  }
   const index = hintIndexForSquares(from, to);
   const hint = index >= 0 ? state.hints[index] : null;
   if (!hint?.uci) {
@@ -4655,6 +4669,17 @@ const els = {
   newGameTabs: document.querySelector(".new-game-tabs"),
   friendWhere: document.getElementById("friend-where"),
   friendSoon: document.getElementById("friend-soon"),
+  onlineSetup: document.getElementById("online-setup"),
+  onlineShare: document.getElementById("online-share"),
+  onlineColor: document.getElementById("online-color"),
+  onlineClock: document.getElementById("online-clock"),
+  onlineCards: document.getElementById("online-cards"),
+  onlineLayout: document.getElementById("online-layout"),
+  onlineLayoutRow: document.getElementById("online-layout-row"),
+  onlineCreate: document.getElementById("btn-online-create"),
+  onlineLink: document.getElementById("online-link"),
+  onlineCopy: document.getElementById("btn-online-copy"),
+  onlineWait: document.getElementById("online-wait"),
   btnNewCancel: document.getElementById("btn-new-cancel"),
   btnNewStart: document.getElementById("btn-new-start"),
   startOpening: document.getElementById("start-opening"),
@@ -4866,10 +4891,19 @@ const state = {
   trainFen: "",
   trainColor: "",
   trainLives: null,
+  onlineToken: "",
+  onlineStatus: "",
+  onlineShowCards: true,
+  onlinePollTimer: 0,
+  onlineApplying: false,
 };
 
 function isLocalVsHuman() {
   return state.mode === "local";
+}
+
+function isOnlineVsHuman() {
+  return state.mode === "online";
 }
 
 function playerIsSideToMove() {
@@ -5978,6 +6012,29 @@ async function startTrainOppReply({ afterTalk } = {}) {
 
 async function computerMove({ silentWait = false, afterTalk } = {}) {
   const gameId = state.gameId;
+  if (isOnlineVsHuman()) {
+    if (state.game.game_over()) {
+      finishGame();
+      return;
+    }
+    if (state.onlineStatus !== "playing") {
+      state.busy = false;
+      syncHintBoardPlay();
+      return;
+    }
+    if (playerIsSideToMove()) {
+      if (state.onlineShowCards) await refreshHints();
+      else {
+        state.busy = false;
+        syncHintBoardPlay();
+      }
+      return;
+    }
+    state.busy = false;
+    setStatus(t("turn.opp"), t("online.waitingMove"), "think");
+    syncHintBoardPlay();
+    return;
+  }
   if (state.game.game_over()) {
     finishGame();
     return;
@@ -6105,6 +6162,23 @@ async function applyUserMove(from, to, promotion, chosenHint) {
   if (state.game.game_over()) {
     await feedbackTalk;
     finishGame();
+    return;
+  }
+  if (isOnlineVsHuman()) {
+    const sent = await sendOnlineMove(played);
+    if (!sent) {
+      state.game.undo();
+      state.busy = false;
+      syncBoard();
+      setStatus(t("error"), t("online.error"), "lose");
+      return;
+    }
+    await feedbackTalk;
+    syncCoach();
+    state.busy = false;
+    if (!state.onlineShowCards) hideHintPanel();
+    setStatus(t("turn.opp"), t("online.waitingMove"), "think");
+    syncHintBoardPlay();
     return;
   }
   if (isLocalVsHuman()) {
@@ -6420,6 +6494,25 @@ function fillColorSelect() {
     .join("");
 }
 
+function fillOnlineColorSelect() {
+  const select = els.onlineColor;
+  if (!select) return;
+  const current = select.value || "random";
+  select.innerHTML = ["random", "w", "b"]
+    .map((color) => {
+      const label = color === "random" ? t("newgame.random") : t(color === "w" ? "newgame.white" : "newgame.black");
+      return `<option value="${color}"${color === current ? " selected" : ""}>${label}</option>`;
+    })
+    .join("");
+}
+
+function fillOnlineCardsSelect() {
+  if (els.onlineCards) {
+    const current = els.onlineCards.value || "1";
+    els.onlineCards.innerHTML = `<option value="1"${current === "1" ? " selected" : ""}>${t("settings.yes")}</option><option value="0"${current === "0" ? " selected" : ""}>${t("settings.no")}</option>`;
+  }
+}
+
 function fillStartKindSelect() {
   const select = els.startKind;
   if (!select) return;
@@ -6459,6 +6552,7 @@ function currentNewGameTab() {
 function canStartNewGame() {
   const tab = currentNewGameTab();
   if (tab === "train") return true;
+  if (tab === "online") return false;
   return tab === "friend" && els.friendWhere?.value === "local";
 }
 
@@ -6475,6 +6569,7 @@ function syncNewGameTabUi() {
   if (els.newGameTitle) els.newGameTitle.textContent = t(`tab.${tab}`);
   if (els.friendSoon) els.friendSoon.hidden = !(tab === "friend" && els.friendWhere?.value === "online");
   if (els.btnNewStart) els.btnNewStart.hidden = !canStartNewGame();
+  syncOnlineLayoutRow();
   syncPlayModeFromTab();
   syncNewGameForm();
 }
@@ -6504,9 +6599,13 @@ function openNewGameDialog(tab = "train") {
   fillFriendWhereSelect();
   fillSkillSelect();
   fillColorSelect();
+  fillOnlineColorSelect();
+  fillOnlineCardsSelect();
   fillStartKindSelect();
   fillHintLayoutSelect();
   fillClockSelect();
+  if (els.onlineClock && els.moveClockSelect) els.onlineClock.innerHTML = els.moveClockSelect.innerHTML;
+  if (els.onlineLayout && els.hintLayout) els.onlineLayout.innerHTML = els.hintLayout.innerHTML;
   fillRoundEvalSelect();
   fillEvalViewSelect();
   fillStoryIconsSelect();
@@ -6520,6 +6619,12 @@ function openNewGameDialog(tab = "train") {
   if (els.roundEval) els.roundEval.value = state.roundEval ? "1" : "0";
   if (els.evalView) els.evalView.value = normalizeEvalView(state.evalView);
   if (els.storyIcons) els.storyIcons.value = state.cardStyle || "war";
+  if (els.onlineColor) els.onlineColor.value = state.playColorPref || "random";
+  if (els.onlineClock) els.onlineClock.value = String(moveClockSec());
+  if (els.onlineCards) els.onlineCards.value = state.onlineShowCards ? "1" : "1";
+  if (els.onlineLayout) els.onlineLayout.value = HINT_LAYOUTS[state.hintLayout] ? state.hintLayout : "6x1";
+  if (els.onlineSetup) els.onlineSetup.hidden = false;
+  if (els.onlineShare) els.onlineShare.hidden = true;
   if (els.btnNewCancel) els.btnNewCancel.hidden = !state.hasGame;
   setNewGameTab(tab);
   if (els.newGame) els.newGame.hidden = false;
@@ -7072,13 +7177,259 @@ function startFirstVisitGame() {
   startQuickTraining(0);
 }
 
+function syncOnlineLayoutRow() {
+  if (els.onlineLayoutRow) els.onlineLayoutRow.hidden = els.onlineCards?.value === "0";
+}
+
+function syncOnlineCardsUi() {
+  document.body.classList.toggle("bmchess-hide-cards", isOnlineVsHuman() && !state.onlineShowCards);
+  if (isOnlineVsHuman() && !state.onlineShowCards) hideHintPanel();
+}
+
+function onlineRest() {
+  return window.BMCHESS_REST || {};
+}
+
+function stopOnlinePoll() {
+  clearTimeout(state.onlinePollTimer);
+  state.onlinePollTimer = 0;
+}
+
+function roomLink(token) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("room", token);
+  return url.toString();
+}
+
+async function onlineFetch(path, options = {}) {
+  const rest = onlineRest();
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (rest.nonce) headers["X-WP-Nonce"] = rest.nonce;
+  const res = await fetch(`${rest.root || ""}${path}`, {
+    credentials: "same-origin",
+    ...options,
+    headers,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || t("online.error"));
+    err.status = res.status;
+    err.code = data.code;
+    throw err;
+  }
+  return data;
+}
+
+function applyOnlineSettings(room) {
+  state.mode = "online";
+  state.onlineToken = room.token;
+  state.onlineStatus = room.status;
+  state.onlineShowCards = Boolean(room.showCards);
+  state.playerColor = room.color === "b" ? "b" : "w";
+  applyHintLayout(room.hintLayout || "6x1");
+  applyMoveClock(room.clockSec || 0);
+  state.startKind = "standard";
+  state.startOpeningId = "start";
+  if (els.playMode) els.playMode.value = "engine";
+  if (els.startKind) els.startKind.value = "standard";
+  syncOnlineCardsUi();
+}
+
+function showOnlineShare(token) {
+  if (els.onlineSetup) els.onlineSetup.hidden = true;
+  if (els.onlineShare) els.onlineShare.hidden = false;
+  if (els.onlineLink) els.onlineLink.value = roomLink(token);
+  if (els.onlineWait) els.onlineWait.textContent = t("online.wait");
+}
+
+async function createOnlineRoom() {
+  if (!onlineRest().root) {
+    setStatus(t("error"), t("online.error"), "lose");
+    return;
+  }
+  const pref = els.onlineColor?.value || "random";
+  const color = pref === "w" || pref === "b" ? pref : "";
+  try {
+    if (els.onlineCreate) els.onlineCreate.disabled = true;
+    const room = await onlineFetch("rooms", {
+      method: "POST",
+      body: JSON.stringify({
+        color,
+        showCards: els.onlineCards?.value !== "0",
+        clockSec: Number(els.onlineClock?.value || 0),
+        hintLayout: els.onlineLayout?.value || "6x1",
+      }),
+    });
+    applyOnlineSettings(room);
+    showOnlineShare(room.token);
+    history.replaceState({}, "", roomLink(room.token));
+    startGame(state.playerColor);
+    startOnlinePoll();
+  } catch (err) {
+    console.error(err);
+    setStatus(t("error"), t("online.error"), "lose");
+  } finally {
+    if (els.onlineCreate) els.onlineCreate.disabled = false;
+  }
+}
+
+async function joinOnlineRoom(token) {
+  try {
+    const room = await onlineFetch(`rooms/${encodeURIComponent(token)}/join`, { method: "POST", body: "{}" });
+    if (room.role === "none") throw Object.assign(new Error(t("online.full")), { status: 409 });
+    applyOnlineSettings(room);
+    closeNewGameDialog();
+    startGame(state.playerColor);
+    replayOnlineMoves(room.moves || []);
+    startOnlinePoll();
+    if (room.status === "playing") speakKing(t("online.joined"));
+  } catch (err) {
+    console.error(err);
+    const msg = err.status === 409 ? t("online.full") : err.status === 404 ? t("online.missing") : t("online.error");
+    setStatus(t("error"), msg, "lose");
+    startFirstVisitGame();
+  }
+}
+
+function replayOnlineMoves(moves) {
+  for (const move of moves || []) {
+    const played = state.game.move({
+      from: move.from,
+      to: move.to,
+      promotion: move.promo || undefined,
+    });
+    if (!played) break;
+    state.board.setLastMove(played.from, played.to);
+  }
+  state.board.setPosition(state.game.fen());
+  renderHistory();
+  syncCoach();
+  syncBoard();
+}
+
+async function sendOnlineMove(played) {
+  if (!state.onlineToken) return false;
+  const over = state.game.game_over();
+  let winner = "";
+  if (over) {
+    if (state.game.in_checkmate()) winner = played.color === "w" ? "w" : "b";
+    else winner = "draw";
+  }
+  try {
+    const room = await onlineFetch(`rooms/${encodeURIComponent(state.onlineToken)}/move`, {
+      method: "POST",
+      body: JSON.stringify({
+        from: played.from,
+        to: played.to,
+        promo: played.promotion || "",
+        san: played.san,
+        fen: state.game.fen(),
+        over: over ? 1 : 0,
+        winner,
+      }),
+    });
+    state.onlineStatus = room.status;
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+async function applyOnlineOppMove(move) {
+  if (state.onlineApplying) return;
+  state.onlineApplying = true;
+  state.busy = true;
+  const played = state.game.move({
+    from: move.from,
+    to: move.to,
+    promotion: move.promo || undefined,
+  });
+  if (!played) {
+    state.onlineApplying = false;
+    state.busy = false;
+    return;
+  }
+  state.board.setLastMove(played.from, played.to);
+  await state.board.animateMove(played.from, played.to);
+  state.board.setPosition(state.game.fen());
+  renderHistory();
+  syncCoach();
+  state.onlineApplying = false;
+  state.busy = false;
+  if (state.game.game_over()) {
+    finishGame();
+    return;
+  }
+  setStatus(t("turn.you"), t("turn.make"), "play");
+  speakKing(t("online.joined"));
+  if (state.onlineShowCards) await refreshHints();
+  else syncHintBoardPlay();
+}
+
+async function pollOnlineRoom() {
+  if (!state.onlineToken || state.mode !== "online") return;
+  try {
+    const room = await onlineFetch(`rooms/${encodeURIComponent(state.onlineToken)}`);
+    const wasWaiting = state.onlineStatus !== "playing";
+    state.onlineStatus = room.status;
+    if (wasWaiting && room.status === "playing") {
+      if (els.onlineWait) els.onlineWait.textContent = t("online.joined");
+      speakKing(t("online.joined"));
+      setStatus(
+        playerIsSideToMove() ? t("turn.you") : t("turn.opp"),
+        playerIsSideToMove() ? t("turn.make") : t("online.waitingMove"),
+        "play"
+      );
+      if (playerIsSideToMove() && state.onlineShowCards) await refreshHints();
+      else syncHintBoardPlay();
+    }
+    const localLen = state.game.history().length;
+    const remote = room.moves || [];
+    if (remote.length > localLen && !state.busy && !state.onlineApplying) {
+      await applyOnlineOppMove(remote[localLen]);
+    }
+    if (room.status === "finished" && !state.game.game_over()) {
+      finishGame();
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+  state.onlinePollTimer = setTimeout(pollOnlineRoom, 1500);
+}
+
+function startOnlinePoll() {
+  stopOnlinePoll();
+  state.onlinePollTimer = setTimeout(pollOnlineRoom, 800);
+}
+
+async function copyOnlineLink() {
+  const value = els.onlineLink?.value;
+  if (!value) return;
+  try {
+    await navigator.clipboard.writeText(value);
+    if (els.onlineCopy) els.onlineCopy.textContent = t("online.copied");
+  } catch (err) {
+    els.onlineLink.select();
+    document.execCommand("copy");
+  }
+}
+
 function finishStartGame() {
   if (isLocalVsHuman()) state.playerColor = state.game.turn();
   state.busy = false;
+  syncOnlineCardsUi();
   syncCoach();
   renderHints();
   renderHistory();
   syncBoard({ keepArrows: true });
+  if (isOnlineVsHuman() && state.onlineStatus !== "playing") {
+    setStatus(t("online.wait"), t("online.shareHint"), "think");
+    speakKing(t("online.wait"));
+    startOnlinePoll();
+    return;
+  }
   setStatus(
     isLocalVsHuman() || playerIsSideToMove() ? t("turn.you") : t("turn.opp"),
     youLabel(),
@@ -7101,7 +7452,13 @@ function startGame(playerColor = state.playerColor) {
   state.kingSpeaking = false;
   state.engine.stop();
   state.game.reset();
-  state.mode = els.playMode?.value === "local" ? "local" : "engine";
+  if (state.mode !== "online") {
+    stopOnlinePoll();
+    state.onlineToken = "";
+    state.onlineStatus = "";
+    document.body.classList.remove("bmchess-hide-cards");
+    state.mode = els.playMode?.value === "local" ? "local" : "engine";
+  }
   state.skill = Number(els.skill?.value || state.skill || 2);
   state.busy = false;
   state.reviewPly = null;
@@ -7159,6 +7516,7 @@ function startGame(playerColor = state.playerColor) {
 }
 
 function undoFullTurn() {
+  if (isOnlineVsHuman()) return;
   if (state.busy || state.game.history().length <= state.openingPly) return;
   state.gameId += 1;
   state.engine.stop();
@@ -7228,6 +7586,10 @@ document.getElementById("btn-resign").addEventListener("click", () => {
     openNewGameDialog();
     return;
   }
+  if (isOnlineVsHuman() && state.onlineToken) {
+    onlineFetch(`rooms/${encodeURIComponent(state.onlineToken)}/resign`, { method: "POST", body: "{}" }).catch(() => {});
+    stopOnlinePoll();
+  }
   state.engine.stop();
   state.busy = false;
   thawKingLives();
@@ -7252,7 +7614,14 @@ els.newGameTabs?.addEventListener("click", (event) => {
   if (!tab) return;
   setNewGameTab(tab.dataset.tab);
 });
-els.friendWhere?.addEventListener("change", () => syncNewGameTabUi());
+els.friendWhere?.addEventListener("change", () => {
+  if (els.friendWhere.value === "online") setNewGameTab("online");
+  else syncNewGameTabUi();
+});
+els.onlineCreate?.addEventListener("click", () => createOnlineRoom());
+els.onlineCopy?.addEventListener("click", () => copyOnlineLink());
+els.onlineCards?.addEventListener("change", () => syncOnlineLayoutRow());
+els.onlineLink?.addEventListener("focus", () => els.onlineLink.select());
 els.playMode?.addEventListener("change", () => syncNewGameForm());
 els.startKind?.addEventListener("change", () => syncNewGameForm());
 els.startOpening?.addEventListener("change", () => previewOpeningLine());
@@ -7423,7 +7792,11 @@ Promise.all([
   state.engine.ready,
   loadOpenings().catch((err) => console.error("Libro aperture:", err)),
 ])
-  .then(() => startFirstVisitGame())
+  .then(() => {
+    const token = new URLSearchParams(window.location.search).get("room");
+    if (token) return joinOnlineRoom(token);
+    startFirstVisitGame();
+  })
   .catch((err) => {
     console.error(err);
     setStatus(t("error"), t("error.stockfish"), "lose");

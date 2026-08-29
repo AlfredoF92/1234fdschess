@@ -66,6 +66,36 @@
 	height: 48px;
 }
 
+.bmchess-root .online-create,
+.bmchess-root #btn-online-copy {
+	margin-top: 8px;
+	border: 1px solid #ddd;
+	background: #629924;
+	color: #fff;
+	border-radius: 7px;
+	padding: 8px 12px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.bmchess-root #btn-online-copy {
+	background: #f4f4f4;
+	color: #333;
+}
+
+.bmchess-root #online-link {
+	width: 100%;
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+}
+
+body.bmchess-hide-cards #hint-panel,
+body.bmchess-hide-cards #hints,
+body.bmchess-hide-cards .train-actions {
+	display: none !important;
+}
+
 body.bmchess-has-game .wp-block-post-title,
 body.bmchess-has-game .wp-block-post-featured-image {
 	display: none;

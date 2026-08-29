@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BMChess
  * Description: Gioco BM Chess in WordPress. Shortcode: [logo] [header-menu] [bm-chess-home]
- * Version: 1.0.4
+ * Version: 1.1.0
  * Author: BM Chess
  * Text Domain: bmchess
  */
@@ -11,10 +11,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BMCHESS_VERSION', '1.0.4' );
+define( 'BMCHESS_VERSION', '1.1.0' );
 define( 'BMCHESS_FILE', __FILE__ );
 define( 'BMCHESS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BMCHESS_URL', plugin_dir_url( __FILE__ ) );
+
+require_once BMCHESS_DIR . 'includes/online.php';
 
 function bmchess_game_url() {
 	return BMCHESS_URL . 'game/';
@@ -100,6 +102,12 @@ function bmchess_enqueue_assets() {
 function bmchess_boot_script() {
 	$game_url = bmchess_game_url();
 	return 'window.BMCHESS_BASE=' . wp_json_encode( $game_url ) . ';'
+		. 'window.BMCHESS_REST=' . wp_json_encode(
+			array(
+				'root'  => esc_url_raw( rest_url( 'bmchess/v1/' ) ),
+				'nonce' => wp_create_nonce( 'wp_rest' ),
+			)
+		) . ';'
 		. '(function(){var KEY="5minchess.uiLang";var lang="en";try{var saved=localStorage.getItem(KEY);if(saved==="it"||saved==="en")lang=saved;}catch(e){}'
 		. 'document.documentElement.lang=lang;window.CHESS_LANG=lang;'
 		. 'window.setChessLang=function(next){if(next!=="it"&&next!=="en")return false;try{localStorage.setItem(KEY,next);}catch(e){}location.reload();return false;};})();';
