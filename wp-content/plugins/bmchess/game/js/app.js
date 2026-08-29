@@ -3804,6 +3804,7 @@ function renderAdminSolutions() {
 }
 
 function setTrainingMode(on) {
+  if (isOnlineVsHuman()) return;
   const next = Boolean(on);
   state.trainingMode = next;
   try {
@@ -3816,6 +3817,7 @@ function setTrainingMode(on) {
 }
 
 async function continueTrainMove({ afterTalk, keepSpeaking = false } = {}) {
+  if (isOnlineVsHuman()) return;
   if (!state.trainHold || state.busy) return;
   const gameOver = state.game.game_over();
   const local = isLocalVsHuman();
@@ -4951,6 +4953,17 @@ function syncCoach() {
     els.playerTop?.classList.toggle("is-turn", state.game.turn() === topColor);
     els.playerYou?.classList.toggle("is-turn", state.game.turn() === botColor);
     if (els.oppKing) els.oppKing.src = asset(`pieces/${topColor}K.svg`);
+  } else if (isOnlineVsHuman()) {
+    if (els.engineLabel) els.engineLabel.textContent = t("online.opp");
+    if (els.playerRatingTop) {
+      els.playerRatingTop.hidden = false;
+      els.playerRatingTop.textContent = t("online.oppHint");
+    }
+    if (els.playerName) els.playerName.textContent = t("you");
+    if (els.playerRating) els.playerRating.textContent = t("you.rating");
+    els.playerTop?.classList.toggle("is-turn", state.game.turn() !== color);
+    els.playerYou?.classList.toggle("is-turn", playerIsSideToMove());
+    if (els.oppKing) els.oppKing.src = asset(`pieces/${state.playerColor === "w" ? "b" : "w"}K.svg`);
   } else {
     if (els.engineLabel) els.engineLabel.textContent = engineLabelText(state.skill);
     if (els.playerRatingTop) els.playerRatingTop.hidden = true;
@@ -5983,6 +5996,7 @@ function revealTrainNext() {
 }
 
 async function startTrainOppReply({ afterTalk } = {}) {
+  if (isOnlineVsHuman()) return;
   const token = ++state.oppSearchToken;
   const gameId = state.gameId;
   const fen = state.game.fen();
@@ -6109,7 +6123,7 @@ async function applyUserMove(from, to, promotion, chosenHint) {
   state.busy = true;
   syncHintBoardPlay();
   const fen = state.game.fen();
-  const trainReview = Boolean(state.trainingMode);
+  const trainReview = Boolean(state.trainingMode) && !isOnlineVsHuman();
   if (trainReview) {
     state.trainHold = true;
     state.trainPickedUci = chosen?.uci || `${from}${to}${promotion || ""}`;
@@ -7228,8 +7242,11 @@ function applyOnlineSettings(room) {
   state.playerColor = room.color === "b" ? "b" : "w";
   applyHintLayout(room.hintLayout || "6x1");
   applyMoveClock(room.clockSec || 0);
+  state.trainingMode = false;
+  state.trainHold = false;
   state.startKind = "standard";
   state.startOpeningId = "start";
+  syncTrainingModeUi();
   if (els.playMode) els.playMode.value = "engine";
   if (els.startKind) els.startKind.value = "standard";
   syncOnlineCardsUi();
@@ -7287,7 +7304,7 @@ async function joinOnlineRoom(token) {
     console.error(err);
     const msg = err.status === 409 ? t("online.full") : err.status === 404 ? t("online.missing") : t("online.error");
     setStatus(t("error"), msg, "lose");
-    startFirstVisitGame();
+    speakKing(msg);
   }
 }
 
@@ -7502,6 +7519,12 @@ function startGame(playerColor = state.playerColor) {
   if (!isLocalVsHuman()) {
     state.playerColor = playerColor;
     state.board.setOrientation(playerColor === "w" ? "white" : "black");
+  }
+  if (isOnlineVsHuman()) {
+    state.startOpening = { id: "start", sans: [] };
+    paintStartOpeningState(state.startOpening);
+    finishStartGame();
+    return;
   }
   if (animateIntro) {
     const opening = selectedStartOpening();
