@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: BMChess
- * Description: Gioco BM Chess in WordPress. Shortcode: [header-menu] [bm-chess-home]
- * Version: 1.0.2
+ * Description: Gioco BM Chess in WordPress. Shortcode: [logo] [header-menu] [bm-chess-home]
+ * Version: 1.0.3
  * Author: BM Chess
  * Text Domain: bmchess
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BMCHESS_VERSION', '1.0.2' );
+define( 'BMCHESS_VERSION', '1.0.3' );
 define( 'BMCHESS_FILE', __FILE__ );
 define( 'BMCHESS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BMCHESS_URL', plugin_dir_url( __FILE__ ) );
@@ -29,6 +29,15 @@ function bmchess_post_has_shortcode( $post = null ) {
 		|| has_shortcode( $post->post_content, 'header-menu' );
 }
 
+function bmchess_post_needs_game_assets( $post = null ) {
+	$post = $post ? $post : get_post();
+	if ( ! $post || empty( $post->post_content ) ) {
+		return false;
+	}
+	return has_shortcode( $post->post_content, 'bm-chess-home' )
+		|| has_shortcode( $post->post_content, 'header-menu' );
+}
+
 function bmchess_should_enqueue() {
 	if ( is_singular() && bmchess_post_has_shortcode() ) {
 		return true;
@@ -36,7 +45,7 @@ function bmchess_should_enqueue() {
 	return ! empty( $GLOBALS['bmchess_shortcode_used'] );
 }
 
-function bmchess_enqueue_assets() {
+function bmchess_enqueue_styles() {
 	static $done = false;
 	if ( $done ) {
 		return;
@@ -57,6 +66,18 @@ function bmchess_enqueue_assets() {
 		array( 'bmchess-game' ),
 		BMCHESS_VERSION
 	);
+}
+
+function bmchess_enqueue_assets() {
+	static $done = false;
+	if ( $done ) {
+		return;
+	}
+	$done = true;
+
+	bmchess_enqueue_styles();
+
+	$game_url = bmchess_game_url();
 
 	if ( function_exists( 'wp_enqueue_script_module' ) ) {
 		wp_enqueue_script_module(
@@ -87,7 +108,7 @@ function bmchess_boot_script() {
 add_action(
 	'wp_enqueue_scripts',
 	function () {
-		if ( is_singular() && bmchess_post_has_shortcode() ) {
+		if ( is_singular() && bmchess_post_needs_game_assets() ) {
 			bmchess_enqueue_assets();
 		}
 	}
@@ -128,3 +149,18 @@ function bmchess_render_header_menu( $atts = array() ) {
 }
 
 add_shortcode( 'header-menu', 'bmchess_render_header_menu' );
+
+function bmchess_render_logo( $atts = array() ) {
+	wp_enqueue_style(
+		'bmchess-wp',
+		BMCHESS_URL . 'assets/bmchess-wp.css',
+		array(),
+		BMCHESS_VERSION
+	);
+
+	$src = esc_url( bmchess_game_url() . 'img/logo.svg' );
+	$home = esc_url( home_url( '/' ) );
+	return '<a class="bmchess-logo" href="' . $home . '"><img src="' . $src . '" alt="BM Chess" width="48" height="48"></a>';
+}
+
+add_shortcode( 'logo', 'bmchess_render_logo' );

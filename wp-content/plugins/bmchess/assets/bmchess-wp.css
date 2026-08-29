@@ -49,6 +49,19 @@
 	display: block;
 }
 
+.bmchess-logo {
+	display: inline-flex;
+	align-items: center;
+	line-height: 0;
+	text-decoration: none;
+}
+
+.bmchess-logo img {
+	display: block;
+	width: 48px;
+	height: 48px;
+}
+
 body.bmchess-has-game .wp-block-post-title,
 body.bmchess-has-game .wp-block-post-featured-image {
 	display: none;
