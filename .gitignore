@@ -1,0 +1,10 @@
+# Credenziali e istruzioni di deploy (solo locale)
+Caricamento-online-file.md
+
+# Backup e file generati
+wp-content/backups-dup-lite/
+wp-content/upgrade/
+wp-content/uploads/
+
+# Copia locale del gioco standalone (non va nel repo WordPress)
+/5minchess/

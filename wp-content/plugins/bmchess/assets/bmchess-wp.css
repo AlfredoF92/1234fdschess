@@ -1,0 +1,59 @@
+/* Isola il gioco dal tema WordPress e lo allarga a tutta la viewport. */
+
+.bmchess-root {
+	--bg: #dcdcdc;
+	--card: #ffffff;
+	--ink: #2c2c2c;
+	--muted: #6b6b6b;
+	--line: #ececec;
+	--green: #629924;
+	--best: #6f8214;
+	--board-light: #f0d9b5;
+	--board-dark: #b58863;
+	--last: rgba(155, 199, 0, 0.41);
+	--select: rgba(20, 85, 30, 0.45);
+	--shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+	--card-art: linear-gradient(180deg, #ffffff 0%, #e8e8e8 100%);
+	--wood: #5a3a22;
+	--radius: 6px;
+	font-family: "Segoe UI", "Noto Sans", sans-serif;
+	background: var(--bg);
+	color: var(--ink);
+	width: 100vw;
+	max-width: 100vw;
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+	padding: 0 12px 24px;
+	box-sizing: border-box;
+}
+
+.bmchess-root,
+.bmchess-root * {
+	box-sizing: border-box;
+}
+
+.bmchess-root button,
+.bmchess-root select {
+	font: inherit;
+}
+
+.bmchess-root .page {
+	min-height: 0;
+}
+
+body.bmchess-has-game .wp-block-post-title,
+body.bmchess-has-game .wp-block-post-featured-image {
+	display: none;
+}
+
+body.bmchess-has-game .wp-site-blocks > header,
+body.bmchess-has-game .wp-site-blocks > footer {
+	position: relative;
+	z-index: 2;
+}
+
+@media (max-width: 900px) {
+	.bmchess-root {
+		padding: 0 8px 16px;
+	}
+}

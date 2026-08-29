@@ -1,0 +1,33 @@
+---
+description: Commit+push ad ogni modifica; FTP solo su richiesta, senza wp-config.php
+alwaysApply: true
+---
+
+# BM Chess — git e deploy
+
+Dopo ogni richiesta utente che **completa** una modifica al sito: fai **commit e push** subito. Non aspettare che l’utente lo chieda.
+
+Quando l’utente chiede di **caricare online**: leggi `Caricamento-online-file.md` e fai upload FTP solo dei file di quella modifica.
+
+## Commit + push (ogni modifica)
+
+1. Non committare a metà lavoro. Un commit per richiesta, quando la modifica è finita.
+2. In parallelo: `git status`, `git diff`, `git log -5 --oneline`.
+3. `git add` selettivo: solo i file di questa modifica.
+4. Non committare `Caricamento-online-file.md`, credenziali, `.env`.
+5. Commit in italiano o nello stile del repo, 1–2 frasi sul perché.
+6. Subito dopo: `git push` (o `git push -u origin HEAD` se manca l’upstream).
+7. Mai `--no-verify`, force push, hard reset. Non usare `git config`.
+
+## Upload FTP (solo se chiesto)
+
+- Credenziali e comandi: `Caricamento-online-file.md` (file locale, gitignored).
+- **Mai** caricare `wp-config.php` (produzione ≠ XAMPP).
+- Mai caricare `Caricamento-online-file.md`, `.cursor/`, `.git/`.
+- Caricare solo i file toccati dalla modifica, non tutto il sito.
+- Dopo l’upload, dirlo in chiusura e ricordare di verificare il sito.
+
+## Esempio
+
+- “Cambia il titolo in homepage” → modifica → commit → push. Stop (niente FTP).
+- “Carica online” → FTP dei file di quella modifica, escluso `wp-config.php`.

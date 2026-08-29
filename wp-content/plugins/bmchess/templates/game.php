@@ -1,0 +1,468 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+?>
+<div class="bmchess-root"><div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="<?php echo esc_url( $game_url . 'img/logo.svg' ); ?>" alt="">
+        </span>
+        <div>
+          <strong data-i18n="brand.name">BM Chess</strong>
+          <span data-i18n="brand.tagline">Trova la mossa migliore!</span>
+        </div>
+      </div>
+      <nav class="quick-bar" data-i18n-aria="quick.aria" aria-label="Quick games">
+        <button type="button" id="quick-train" class="quick-btn is-primary" data-i18n="newgame.menu" data-i18n-title="quick.trainHint" title="Training from the starting position">Start a new game</button>
+        <button type="button" id="quick-train-12" class="quick-btn" data-i18n="quick.train12" data-i18n-title="quick.train12Hint" title="Training after 12 moves">12 moves</button>
+        <button type="button" id="quick-train-24" class="quick-btn" data-i18n="quick.train24" data-i18n-title="quick.train24Hint" title="Training after 24 moves">24 moves</button>
+        <button type="button" id="btn-training-mode" class="quick-btn" data-i18n="train.mode" data-i18n-title="train.modeHint" title="First you only see the moves. After you pick one, scores, labels and hearts appear." aria-pressed="false">Training mode</button>
+        <button type="button" id="quick-online" class="quick-btn" data-i18n="tab.online" data-i18n-title="quick.onlineHint" title="Play online">Play online</button>
+        <button type="button" id="quick-settings" class="quick-btn" data-i18n="tab.settings" data-i18n-title="quick.settingsHint" title="Open settings">Settings</button>
+      </nav>
+      <div class="app-menu">
+        <button type="button" id="btn-menu" class="app-menu-btn" data-i18n-aria="menu.aria" aria-label="Menu" aria-expanded="false" aria-controls="app-menu-panel">â˜°</button>
+        <div id="app-menu-panel" class="app-menu-panel" hidden>
+          <p class="app-menu-label" data-i18n="lang.group">Language</p>
+          <div class="lang-switch" role="group" data-i18n-aria="lang.group" aria-label="Language">
+            <button type="button" id="btn-lang-it" data-lang="it" data-i18n-aria="lang.it" aria-label="Italiano" onclick="return setChessLang('it')">
+              <svg class="lang-flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>
+              IT
+            </button>
+            <button type="button" id="btn-lang-en" class="is-on" data-lang="en" data-i18n-aria="lang.en" aria-label="English" onclick="return setChessLang('en')">
+              <svg class="lang-flag" viewBox="0 0 60 30" aria-hidden="true">
+                <clipPath id="uk-flag"><path d="M0 0h60v30H0z"/></clipPath>
+                <g clip-path="url(#uk-flag)">
+                  <path d="M0 0h60v30H0z" fill="#012169"/>
+                  <path d="M0 0l60 30M60 0L0 30" stroke="#fff" stroke-width="6"/>
+                  <path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="4"/>
+                  <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+                  <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>
+                </g>
+              </svg>
+              EN
+            </button>
+          </div>
+          <button type="button" id="btn-menu-new" class="app-menu-new" data-i18n="newgame.menu">Start a new game</button>
+          <button type="button" id="btn-menu-settings" class="app-menu-settings" data-i18n="tab.settings">Settings</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="game">
+      <section class="board-col">
+        <aside class="panel side-dock">
+          <div class="card is-compact">
+            <div class="dock-row">
+            <div class="player opponent" id="player-top">
+              <span class="dot"></span>
+              <div class="player-king-block">
+                <img id="opp-king" class="player-king" src="<?php echo esc_url( $game_url . 'pieces/bK.svg' ); ?>" alt="">
+                <div id="opp-lives" class="king-lives player-lives" data-i18n-aria="king.oppLives" aria-label="Cuori del re avversario"></div>
+              </div>
+              <div>
+                <div id="engine-label" class="name">Stockfish 1400 Elo</div>
+                <div id="player-rating-top" class="rating" data-i18n="you.rating">player</div>
+                <div id="game-info" class="game-info">Best 6 | Unlimited time | Mode Best Move</div>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button id="btn-flip" type="button" data-i18n-title="toolbar.flip" title="Flip the board">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H9v8H7V7zm10 10H7v-2h8V7h2v10z"/></svg>
+              </button>
+              <button id="btn-undo" type="button" data-i18n-title="toolbar.undo" title="Undo the last move">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 18l-6-6 6-6v4h8v4h-8v4z"/></svg>
+              </button>
+              <button id="btn-new" type="button" data-i18n-title="toolbar.new" title="New game">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 6v2.5l3.5-3.5L12 1.5V4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6z"/></svg>
+              </button>
+            </div>
+
+            <div id="review-bar" class="review-bar">
+              <div class="review-nav">
+                <button id="btn-review-back" type="button" data-i18n-title="review.back" title="Previous move">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.4 6.4 9.8 12l5.6 5.6L14 19l-7-7 7-7 1.4 1.4z"/></svg>
+                </button>
+                <button id="btn-review-fwd" type="button" data-i18n-title="review.fwd" title="Next move" disabled>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.6 6.4 14.2 12 8.6 17.6 10 19l7-7-7-7-1.4 1.4z"/></svg>
+                </button>
+              </div>
+              <button id="btn-review-live" class="review-live" type="button" data-i18n="review.live" hidden>Torna live</button>
+            </div>
+            <details class="moves-acc">
+              <summary data-i18n="moves.toggle">Moves</summary>
+              <div id="moves" class="moves" data-i18n-aria="moves.aria" aria-label="Move list"></div>
+            </details>
+
+            <div class="actions">
+              <button id="btn-resign" type="button" data-i18n-title="resign" title="Resign">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 3h2v18H6V3zm3 1l10 5-10 5V4z"/></svg>
+                <span data-i18n="resign">Resign</span>
+              </button>
+            </div>
+
+            <div class="player you" id="player-you">
+              <span class="dot"></span>
+              <div>
+                <div id="player-name" class="name" data-i18n="you">You</div>
+                <div id="player-rating" class="rating" data-i18n="you.rating">player</div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </aside>
+        <div id="grave-top" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
+        <div class="board-with-eval">
+          <div class="board-stage">
+            <div id="board-root"></div>
+            <p id="board-pick-note" class="board-pick-note" hidden></p>
+          </div>
+          <div id="eval-bar" class="eval-bar is-blocks" data-i18n-aria="eval.bar" aria-label="Valutazione della posizione" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div class="eval-bar-track" aria-hidden="true">
+              <div id="eval-bar-cells" class="eval-bar-cells"></div>
+              <i id="eval-bar-fill" class="eval-bar-fill"></i>
+              <i id="eval-bar-delta" class="eval-bar-delta" hidden></i>
+            </div>
+            <div id="eval-bar-scale" class="eval-bar-scale" aria-hidden="true"></div>
+            <div class="eval-bar-scores">
+              <span id="eval-bar-score" class="eval-bar-score">0</span>
+              <div id="eval-bar-prev-wrap" class="eval-bar-prev-wrap" hidden>
+                <span id="eval-bar-prev-label" class="eval-bar-prev-label" data-i18n="eval.bar.prev">Previous move</span>
+                <span id="eval-bar-prev" class="eval-bar-prev"></span>
+              </div>
+            </div>
+          </div>
+          <div id="opening-intro" class="opening-intro" hidden>
+            <div id="opening-intro-bar" class="opening-intro-bar" role="progressbar" data-i18n-aria="opening.intro.aria" aria-label="Caricamento della partita" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
+              <i id="opening-intro-fill"></i>
+            </div>
+            <p id="opening-intro-name" class="opening-intro-name"></p>
+            <p id="opening-intro-luck" class="opening-intro-luck" hidden></p>
+          </div>
+        </div>
+        <div id="grave-bottom" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
+      </section>
+
+      <section class="coach-col">
+        <p id="turn-banner" class="turn-banner">Loading</p>
+        <div class="king-talk">
+          <div class="king-side">
+            <img id="king-piece" src="<?php echo esc_url( $game_url . 'pieces/wK.svg' ); ?>" alt="">
+            <span id="king-react" class="king-react" hidden aria-hidden="true"></span>
+            <strong id="king-title" data-i18n="king">The King</strong>
+            <div class="king-meters">
+              <div id="king-lives" class="king-lives" data-i18n-aria="king.lives" aria-label="How the game stands"></div>
+              <div id="king-sword" class="king-swords" hidden data-i18n-aria="king.sword" aria-label="Danno inflitto all'avversario"></div>
+            </div>
+          </div>
+          <blockquote class="speech" aria-live="polite">
+            <p id="king-note">Good luck!</p>
+            <div id="king-finale" class="king-finale" hidden>
+              <div id="hint-mix" class="hint-mix" hidden></div>
+            </div>
+          </blockquote>
+        </div>
+        <div id="twentieths-lives" class="twentieths-lives" hidden>
+          <div class="twentieths-meter is-you">
+            <span class="twentieths-label" data-i18n="you">You</span>
+            <span id="twentieths-you-count" class="twentieths-count" aria-live="polite" aria-atomic="true">20<span class="twentieths-heart">â™¥</span></span>
+          </div>
+          <div id="twentieths-opp-meter" class="twentieths-meter is-opp">
+            <span class="twentieths-label" data-i18n="opp">Opponent</span>
+            <span id="twentieths-opp-count" class="twentieths-count" aria-live="polite" aria-atomic="true">20<span class="twentieths-heart">â™¥</span></span>
+          </div>
+        </div>
+        <div id="hint-panel" class="hint-panel is-waiting">
+        <div id="move-clock" class="move-clock" hidden data-i18n-aria="clock.aria" aria-label="Move timer">
+          <span id="move-clock-num" class="move-clock-num">20</span>
+          <span class="move-clock-bar" aria-hidden="true"><i id="move-clock-fill"></i></span>
+        </div>
+        <div id="hints" class="hints is-cards is-six is-cols-3 is-waiting" data-i18n-aria="hints.aria" aria-label="The King's suggestions"></div>
+        <div id="hint-nav" class="hint-nav" hidden>
+          <button id="btn-more-hints" class="more-hints" type="button" disabled>See the other 6 moves</button>
+        </div>
+        </div>
+        <div class="train-actions">
+          <div id="train-reply" class="train-reply" hidden>
+            <button type="button" id="btn-train-continue" class="train-continue" data-i18n="train.reply">Rispondi all'avversario</button>
+          </div>
+        </div>
+        <aside id="admin-solutions" class="admin-solutions" hidden>
+          <h3 data-i18n="admin.solutions">Riquadro per admin</h3>
+          <div id="admin-ply" class="admin-ply">
+            <span class="admin-ply-badge">
+              <span id="admin-ply-num" class="admin-ply-num">1.</span>
+              <span id="admin-ply-dots" class="admin-ply-dots" hidden>...</span>
+            </span>
+            <div class="admin-ply-meta">
+              <strong id="admin-ply-turn">Bianco</strong>
+              <span id="admin-ply-last" class="admin-ply-last"></span>
+            </div>
+          </div>
+          <div id="admin-eval" class="admin-eval" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" data-i18n-aria="admin.eval.aria" aria-label="Valutazione Stockfish">
+            <div class="admin-eval-col">
+              <span id="admin-eval-top" class="admin-eval-cap">Nero</span>
+              <div class="admin-eval-track" aria-hidden="true">
+                <i id="admin-eval-fill" class="admin-eval-fill"></i>
+              </div>
+              <span id="admin-eval-bottom" class="admin-eval-cap">Bianco</span>
+            </div>
+            <div class="admin-eval-meta">
+              <span class="admin-eval-label" data-i18n="admin.eval">Stockfish</span>
+              <strong id="admin-eval-score" class="admin-eval-score">0,00</strong>
+            </div>
+          </div>
+          <ol id="admin-solutions-list" class="admin-solutions-list"></ol>
+        </aside>
+        <div class="coach-tools">
+          <button type="button" id="btn-quick-tools" class="coach-tools-open" data-i18n="tools.quick" aria-haspopup="dialog" aria-controls="quick-tools" aria-expanded="false">Impostazioni rapide</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="quick-tools" class="quick-tools" hidden>
+    <div class="quick-tools-card" role="dialog" aria-modal="true" aria-labelledby="quick-tools-title">
+      <h2 id="quick-tools-title" data-i18n="tools.quick">Impostazioni rapide</h2>
+      <div class="quick-tools-rows">
+        <div id="hint-recalc" class="coach-row hint-recalc">
+          <div id="hint-recalc-bar" class="hint-recalc-bar" hidden role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-i18n-aria="hints.recalcBar" aria-label="Recalculating moves">
+            <i id="hint-recalc-fill"></i>
+          </div>
+          <span class="coach-row-label" data-i18n="hints.recalc">Ricalcolami le mosse migliori</span>
+          <button type="button" id="btn-recalc-hints" class="coach-switch" data-i18n-aria="hints.recalc" aria-label="Ricalcolami le mosse migliori" disabled>Vai</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="aid.moves">Frecce sulla scacchiera</span>
+          <button type="button" id="btn-aid-moves" class="coach-switch is-on" aria-pressed="true">On</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="aid.reviewArrows">Visualizza frecce dopo aver selezionato la mossa scelta</span>
+          <button type="button" id="btn-review-arrows" class="coach-switch" aria-pressed="false" data-i18n-aria="aid.reviewArrowsAria" aria-label="Visualizza le frecce delle cards dopo la scelta">Off</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="aid.reviewArrowLabels">Numero e variazione sulle caselle delle frecce</span>
+          <button type="button" id="btn-review-arrow-labels" class="coach-switch" aria-pressed="false" data-i18n-aria="aid.reviewArrowLabelsAria" aria-label="Mostra posizione e variazione sulle caselle delle frecce">Off</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="aid.cardClick">Click sulle cards</span>
+          <button type="button" id="btn-card-click" class="coach-switch is-on" aria-pressed="true" data-i18n-aria="aid.cardClickAria" aria-label="Scegli le mosse cliccando le cards">On</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="aid.threats">Evidenzia i pezzi minacciati</span>
+          <button type="button" id="btn-aid-threats" class="coach-switch" aria-pressed="false">Off</button>
+        </div>
+        <div id="card-style-menu" class="coach-row style-menu">
+          <span class="coach-row-label" data-i18n="settings.storyIcons">Stile cards</span>
+          <button type="button" id="btn-card-style" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="settings.storyIconsAria" aria-label="Stile delle carte delle mosse">War</button>
+          <div id="card-style-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="train.autoContinue">Vai alle prossime mosse in automatico quando l'avversario risponde</span>
+          <button type="button" id="btn-auto-continue" class="coach-switch" aria-pressed="false">Off</button>
+        </div>
+        <h3 class="quick-tools-section" data-i18n="tools.hintInfo">Visualizza info mossa</h3>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.place">La posizione</span>
+          <button type="button" id="btn-hint-place" class="coach-switch is-on" aria-pressed="true">On</button>
+        </div>
+        <div id="hint-sign-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.sign">Info +/-</span>
+          <button type="button" id="btn-hint-sign" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.hintInfo.signAria" aria-label="Come mostrare se la mossa guadagna o perde un cuore, o guadagna una spada">La freccia (su e giÃ¹)</button>
+          <div id="hint-sign-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div id="hint-eval-view-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.eval">Valutazione punteggio</span>
+          <button type="button" id="btn-hint-eval-view" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="settings.evalViewAria" aria-label="Come mostrare il punteggio delle mosse">Massima</button>
+          <div id="hint-eval-view-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div id="hint-score-mode-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.score">Numero valutazione</span>
+          <button type="button" id="btn-hint-score-mode" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.hintInfo.scoreAria" aria-label="Mostra il punteggio come numero o come cuori">Numero</button>
+          <div id="hint-score-mode-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div id="hint-overlay-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.overlay">Voglio visualizzare le info della valutazione delle cards dopo che ho scelto</span>
+          <button type="button" id="btn-hint-overlay" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.hintInfo.overlayAria" aria-label="Come mostrare le info di valutazione sulle carte dopo la scelta">Esterna</button>
+          <div id="hint-overlay-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <h3 class="quick-tools-section" data-i18n="tools.evalBar">Barra di valutazione</h3>
+        <div id="eval-bar-style-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.evalBar.style">Stile barra</span>
+          <button type="button" id="btn-eval-bar-style" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.evalBar.styleAria" aria-label="Come mostrare la barra di valutazione">A blocchi</button>
+          <div id="eval-bar-style-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.evalBar.hideDiff">Nascondi differenza</span>
+          <button type="button" id="btn-eval-bar-hide-diff" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.evalBar.hideDiffAria" aria-label="Nascondi il valore della mossa precedente e la differenza sulla barra">Off</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.evalBar.blockOnly">Aggiorna solo il blocco</span>
+          <button type="button" id="btn-eval-bar-block-only" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.evalBar.blockOnlyAria" aria-label="Aggiorna la barra solo quando il punteggio supera un blocco da un pedone">Off</button>
+        </div>
+        <h3 class="quick-tools-section is-admin" data-i18n="tools.admin">Impostazioni per ADMIN</h3>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.admin.solutions">Riquadro per admin</span>
+          <button type="button" id="btn-admin-solutions" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.admin.solutionsAria" aria-label="Mostra il riquadro admin">Off</button>
+        </div>
+      </div>
+      <div class="quick-tools-actions">
+        <button type="button" id="btn-quick-tools-close" data-i18n="tools.close">Chiudi</button>
+      </div>
+    </div>
+  </div>
+  <div id="promo" class="promo" hidden></div>
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay-card">
+      <h2 id="overlay-title"></h2>
+      <p id="overlay-text"></p>
+    </div>
+  </div>
+  <div id="new-game" class="new-game" hidden>
+    <div class="new-game-card" role="dialog" aria-modal="true" data-i18n-aria="newgame.title" aria-labelledby="new-game-title">
+      <div class="new-game-tabs" role="tablist" data-i18n-aria="tab.aria" aria-label="Section">
+        <button type="button" class="is-on" role="tab" id="tab-train" data-tab="train" aria-selected="true" aria-controls="panel-train" data-i18n="tab.train">Training</button>
+        <button type="button" role="tab" id="tab-online" data-tab="online" aria-selected="false" aria-controls="panel-online" data-i18n="tab.online">Play online</button>
+        <button type="button" role="tab" id="tab-friend" data-tab="friend" aria-selected="false" aria-controls="panel-friend" data-i18n="tab.friend">Play with a friend</button>
+        <button type="button" role="tab" id="tab-settings" data-tab="settings" aria-selected="false" aria-controls="panel-settings" data-i18n="tab.settings">Settings</button>
+      </div>
+      <h2 id="new-game-title">Training</h2>
+      <select id="play-mode" hidden>
+        <option value="engine" selected>Stockfish</option>
+        <option value="local">Play against an opponent on my PC</option>
+      </select>
+      <div id="panel-train" class="new-game-panel new-game-form" role="tabpanel" data-panel="train" aria-labelledby="tab-train">
+        <label class="skill-wrap" id="skill-row">
+          <span data-i18n="difficulty">Difficulty</span>
+          <select id="skill" data-i18n-aria="skill.aria" aria-label="Stockfish level">
+            <option value="1">1 â€” 1300 Elo</option>
+            <option value="2" selected>2 â€” 1400 Elo</option>
+            <option value="3">3 â€” 1600 Elo</option>
+            <option value="4">4 â€” 1800 Elo</option>
+            <option value="5">5 â€” 2000 Elo</option>
+            <option value="6">6 â€” 2200 Elo</option>
+            <option value="7">7 â€” 2400 Elo</option>
+            <option value="8">8 â€” 2600 Elo</option>
+            <option value="9">9 â€” Full strength</option>
+          </select>
+        </label>
+        <label class="skill-wrap" id="color-row">
+          <span data-i18n="newgame.color">Play as</span>
+          <select id="play-color" data-i18n-aria="newgame.colorAria" aria-label="Your color">
+            <option value="random" selected>Random</option>
+            <option value="w">White</option>
+            <option value="b">Black</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="start.game">Game start</span>
+          <select id="start-kind" data-i18n-aria="start.kindAria" aria-label="Starting type">
+            <option value="standard">Standard</option>
+            <option value="custom" selected>Custom</option>
+          </select>
+        </label>
+        <label class="skill-wrap" id="custom-opening-row">
+          <span data-i18n="start.customPos">Custom position</span>
+          <select id="start-opening" data-i18n-aria="start.aria" aria-label="Starting opening">
+            <option value="random" selected>RANDOM</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="hints.layout">Suggested moves</span>
+          <select id="hint-layout" data-i18n-aria="hints.layoutAria" aria-label="Number of suggested moves">
+            <option value="6x1" selected>The 6 best moves</option>
+            <option value="4x1">The 4 best moves</option>
+            <option value="6x2">2 blocks of 6</option>
+            <option value="4x2">2 blocks of 4</option>
+            <option value="4x3">3 blocks of 4</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="clock.label">Time per move</span>
+          <select id="move-clock-sec" data-i18n-aria="clock.settingAria" aria-label="Time per move">
+            <option value="0" selected>Unlimited</option>
+            <option value="10">10 seconds (with the best move)</option>
+            <option value="30">30 seconds</option>
+            <option value="45">45 seconds</option>
+            <option value="60">1 minute</option>
+          </select>
+        </label>
+        <p id="opening-line" class="opening-line">Starting from the initial position.</p>
+      </div>
+      <div id="panel-online" class="new-game-panel" role="tabpanel" data-panel="online" aria-labelledby="tab-online" hidden>
+        <p class="new-game-soon" data-i18n="soon.online">Coming soon. You will be able to play online against other players.</p>
+      </div>
+      <div id="panel-friend" class="new-game-panel new-game-form" role="tabpanel" data-panel="friend" aria-labelledby="tab-friend" hidden>
+        <label class="skill-wrap">
+          <span data-i18n="friend.where">How do you want to play</span>
+          <select id="friend-where" data-i18n-aria="friend.whereAria" aria-label="Same PC or online">
+            <option value="local" selected>On the same PC</option>
+            <option value="online">Online</option>
+          </select>
+        </label>
+        <p id="friend-soon" class="new-game-soon" data-i18n="soon.friend" hidden>Coming soon. You will be able to play online with a friend.</p>
+      </div>
+      <div id="panel-settings" class="new-game-panel new-game-form" role="tabpanel" data-panel="settings" aria-labelledby="tab-settings" hidden>
+        <div class="skill-wrap">
+          <span data-i18n="lang.group">Language</span>
+          <div class="lang-switch" role="group" data-i18n-aria="lang.group" aria-label="Language">
+            <button type="button" data-lang="it" data-i18n-aria="lang.it" aria-label="Italiano" onclick="return setChessLang('it')">
+              <svg class="lang-flag" viewBox="0 0 3 2" aria-hidden="true"><rect width="1" height="2" fill="#009246"/><rect x="1" width="1" height="2" fill="#fff"/><rect x="2" width="1" height="2" fill="#ce2b37"/></svg>
+              IT
+            </button>
+            <button type="button" data-lang="en" data-i18n-aria="lang.en" aria-label="English" onclick="return setChessLang('en')">
+              <svg class="lang-flag" viewBox="0 0 60 30" aria-hidden="true">
+                <clipPath id="uk-flag-settings"><path d="M0 0h60v30H0z"/></clipPath>
+                <g clip-path="url(#uk-flag-settings)">
+                  <path d="M0 0h60v30H0z" fill="#012169"/>
+                  <path d="M0 0l60 30M60 0L0 30" stroke="#fff" stroke-width="6"/>
+                  <path d="M0 0l60 30M60 0L0 30" stroke="#C8102E" stroke-width="4"/>
+                  <path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/>
+                  <path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/>
+                </g>
+              </svg>
+              EN
+            </button>
+          </div>
+        </div>
+        <label class="skill-wrap">
+          <span data-i18n="settings.roundEval">Arrotonda punteggio</span>
+          <select id="round-eval" data-i18n-aria="settings.roundEvalAria" aria-label="Round move scores">
+            <option value="0" selected>No</option>
+            <option value="1">Yes</option>
+          </select>
+        </label>
+        <p class="new-game-soon" data-i18n="settings.roundEvalHint">Se sÃ¬, i punteggi si vedono a passi di 10: +34â™¥ diventa +30â™¥.</p>
+        <label class="skill-wrap">
+          <span data-i18n="settings.evalView">Visualizzazione punteggio</span>
+          <select id="eval-view" data-i18n-aria="settings.evalViewAria" aria-label="Come mostrare il punteggio delle mosse">
+            <option value="abs">Valutazione assoluta della posizione</option>
+            <option value="delta" selected>Variazione rispetto alla posizione</option>
+            <option value="prevOpp">Variazione rispetto a prima della mossa avversaria</option>
+            <option value="sword">Variante con spada</option>
+            <option value="twentieths">In ventesimi</option>
+          </select>
+        </label>
+        <p class="new-game-soon" data-i18n="settings.evalViewHint">Massima: quanto stai avanti o indietro dopo la mossa. Variazione: rispetto alla best di adesso. Prima della mossa avversaria: quanto recuperi o perdi rispetto a prima che lâ€™avversario muovesse. Variante con spada: stesso numero di quella variazione; i cuori e le spade sotto il Re restano rispetto a 0.</p>
+        <label class="skill-wrap">
+          <span data-i18n="settings.storyIcons">Stile cards</span>
+          <select id="story-icons" data-i18n-aria="settings.storyIconsAria" aria-label="Stile delle carte delle mosse">
+            <option value="icons">Standard - Icone</option>
+            <option value="war" selected>Stile war</option>
+            <option value="fumetto">Stile fumetto</option>
+          </select>
+        </label>
+        <p class="new-game-soon" data-i18n="settings.storyIconsHint">Le carte hanno lo stesso formato. Cambia solo il contenuto: icone, stile war oppure stile fumetto.</p>
+        <p class="new-game-soon" data-i18n="settings.more">More settings will arrive here soon.</p>
+      </div>
+      <div class="new-game-actions">
+        <button type="button" id="btn-new-cancel" data-i18n="newgame.cancel">Cancel</button>
+        <button type="button" id="btn-new-start" class="is-primary" data-i18n="newgame.start">Start game</button>
+      </div>
+    </div>
+  </div>
+</div>
+
