@@ -22,18 +22,6 @@ if ( ! defined( 'ABSPATH' ) ) {
               </div>
             </div>
 
-            <div class="toolbar">
-              <button id="btn-flip" type="button" data-i18n-title="toolbar.flip" title="Flip the board">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H9v8H7V7zm10 10H7v-2h8V7h2v10z"/></svg>
-              </button>
-              <button id="btn-undo" type="button" data-i18n-title="toolbar.undo" title="Undo the last move">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 18l-6-6 6-6v4h8v4h-8v4z"/></svg>
-              </button>
-              <button id="btn-new" type="button" data-i18n-title="toolbar.new" title="New game">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 6v2.5l3.5-3.5L12 1.5V4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6z"/></svg>
-              </button>
-            </div>
-
             <div id="review-bar" class="review-bar">
               <div class="review-nav">
                 <button id="btn-review-back" type="button" data-i18n-title="review.back" title="Previous move">
@@ -49,13 +37,6 @@ if ( ! defined( 'ABSPATH' ) ) {
               <summary data-i18n="moves.toggle">Moves</summary>
               <div id="moves" class="moves" data-i18n-aria="moves.aria" aria-label="Move list"></div>
             </details>
-
-            <div class="actions">
-              <button id="btn-resign" type="button" data-i18n-title="resign" title="Resign">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 3h2v18H6V3zm3 1l10 5-10 5V4z"/></svg>
-                <span data-i18n="resign">Resign</span>
-              </button>
-            </div>
 
             <div class="player you" id="player-you">
               <span class="dot"></span>

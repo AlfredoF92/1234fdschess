@@ -7669,24 +7669,49 @@ document.getElementById("btn-menu-new")?.addEventListener("click", () => {
   setAppMenuOpen(false);
   openNewGameDialog();
 });
-document.getElementById("btn-menu-settings")?.addEventListener("click", () => openSettingsDialog());
-document.getElementById("quick-train")?.addEventListener("click", () => startQuickTraining(0));
-document.getElementById("quick-train-12")?.addEventListener("click", () => startQuickTraining(12));
-document.getElementById("quick-train-24")?.addEventListener("click", () => startQuickTraining(24));
-document.getElementById("quick-online")?.addEventListener("click", () => openQuickOnline());
-document.getElementById("quick-settings")?.addEventListener("click", () => openSettingsDialog());
+document.getElementById("btn-menu-settings")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  openSettingsDialog();
+});
+document.getElementById("quick-train")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  startQuickTraining(0);
+});
+document.getElementById("quick-train-12")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  startQuickTraining(12);
+});
+document.getElementById("quick-train-24")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  startQuickTraining(24);
+});
+document.getElementById("quick-online")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  openQuickOnline();
+});
+document.getElementById("quick-settings")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  openSettingsDialog();
+});
 document.addEventListener("click", (event) => {
   const menu = event.target.closest(".app-menu");
   if (!menu) setAppMenuOpen(false);
 });
-document.getElementById("btn-new").addEventListener("click", () => openNewGameDialog());
-document.getElementById("btn-flip").addEventListener("click", () => {
+document.getElementById("btn-new")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  openNewGameDialog();
+});
+document.getElementById("btn-flip")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
   const next = state.board.orientation === "white" ? "black" : "white";
   state.board.setOrientation(next);
   syncCoach();
   renderGraveyard();
 });
-document.getElementById("btn-undo").addEventListener("click", undoFullTurn);
+document.getElementById("btn-undo")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
+  undoFullTurn();
+});
 els.reviewBack?.addEventListener("click", () => stepReview(-1));
 els.reviewFwd?.addEventListener("click", () => stepReview(1));
 els.reviewLive?.addEventListener("click", () => exitReview());
@@ -7698,7 +7723,8 @@ els.moves?.addEventListener("click", (event) => {
   if (ply >= livePly()) exitReview();
   else showReviewPly(ply);
 });
-document.getElementById("btn-resign").addEventListener("click", () => {
+document.getElementById("btn-resign")?.addEventListener("click", () => {
+  setAppMenuOpen(false);
   if (state.game.game_over() || !state.game.history().length) {
     openNewGameDialog();
     return;
@@ -7840,7 +7866,10 @@ els.hintOverlayList?.addEventListener("click", (event) => {
   applyHintOverlay(item.getAttribute("data-hint-overlay"));
   closeValueMenus();
 });
-els.trainingMode?.addEventListener("click", () => setTrainingMode(!state.trainingMode));
+els.trainingMode?.addEventListener("click", () => {
+  setTrainingMode(!state.trainingMode);
+  setAppMenuOpen(false);
+});
 els.autoContinue?.addEventListener("click", () => setAutoContinue(!state.autoContinue));
 els.adminSolutionsBtn?.addEventListener("click", () => setAdminSolutions(!state.adminSolutions));
 els.trainContinue?.addEventListener("click", () => {

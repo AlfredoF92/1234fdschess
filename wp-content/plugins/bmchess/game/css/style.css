@@ -102,40 +102,67 @@
 
 .app-menu {
   position: relative;
-  z-index: 8;
+  z-index: 40;
   flex-shrink: 0;
 }
 .app-menu-btn {
-  width: 40px;
-  height: 36px;
-  border: 1px solid #d5d5d5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-width: 44px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #fff;
-  color: #333;
-  font-size: 20px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  box-shadow: none;
+}
+.app-menu-btn svg {
+  display: block;
+  flex-shrink: 0;
 }
 .app-menu-btn[aria-expanded="true"],
 .app-menu-btn:hover {
-  border-color: #bbb;
-  background: #f7f7f7;
+  border-color: #555;
+  background: #252525;
 }
 .app-menu-panel {
   position: absolute;
   right: 0;
   top: calc(100% + 6px);
-  width: 240px;
+  width: min(320px, calc(100vw - 24px));
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 12px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+  background: var(--card);
+  box-shadow: var(--shadow);
 }
 .app-menu-panel[hidden] { display: none; }
+.app-menu-actions,
+.app-menu-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.app-menu-panel .quick-btn {
+  width: 100%;
+  white-space: normal;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 14px;
+}
 .app-menu-label {
-  margin: 0 0 6px;
+  margin: 12px 0 6px;
   font-size: 12px;
   font-weight: 700;
   color: var(--muted);
@@ -3442,6 +3469,17 @@ body.is-local .vs-engine { display: none; }
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
   .brand span { display: none; }
+  .topbar {
+    padding: 8px 10px;
+  }
+  .app-menu-panel {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: 52px;
+    width: auto;
+    max-height: calc(100dvh - 60px);
+  }
 }
 
 @media (max-width: 560px) {
@@ -3490,6 +3528,9 @@ body {
   border-color: var(--line);
   background: var(--card);
   box-shadow: var(--shadow);
+}
+.app-menu-panel > .app-menu-label:first-child {
+  margin-top: 0;
 }
 .app-menu-settings {
   border-color: var(--line);

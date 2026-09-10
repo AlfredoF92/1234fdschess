@@ -46,7 +46,9 @@
 }
 
 .bmchess-header-root .topbar {
-	justify-content: flex-start;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 4px 4px;
 }
 
 .bmchess-header-root .app-menu-btn svg {
@@ -62,8 +64,14 @@
 
 .bmchess-logo img {
 	display: block;
-	width: 48px;
-	height: 48px;
+	width: 40px;
+	height: 40px;
+}
+
+body:has(#app-menu-panel) .quick-bar,
+body:has(#app-menu-panel) .board-col .toolbar,
+body:has(#app-menu-panel) .dock-row > .actions {
+	display: none;
 }
 
 .bmchess-root .online-create,
