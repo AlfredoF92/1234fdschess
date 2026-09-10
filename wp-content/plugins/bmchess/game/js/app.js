@@ -3003,6 +3003,7 @@ function resetEvalBarHistory() {
   state.evalBarBefore = null;
 }
 
+const PREVIEW_SLOTS = 6;
 const EVAL_BAR_CELLS = 20;
 const EVAL_BAR_TICKS = [
   { pawn: -10, text: "−10", edge: "start" },
@@ -3385,7 +3386,7 @@ function boardMovePreviewEl() {
   const el = document.createElement("div");
   el.id = "board-move-preview";
   el.className = "board-move-preview";
-  el.hidden = true;
+  el.hidden = false;
   el.setAttribute("aria-label", t("board.preview"));
   stage.insertAdjacentElement("afterend", el);
   els.boardMovePreview = el;
@@ -3411,36 +3412,42 @@ function previewHintSan(hint, fen = "") {
   return hintSan(hint);
 }
 
+function emptyPreviewItemHtml() {
+  return `<div class="board-preview-item is-empty" aria-hidden="true"></div>`;
+}
+
 function paintMovePreview(el, pool, picked, { evalPool = null, hideWhileWaiting = false, sanFen = "" } = {}) {
   if (!el) return;
   const list = previewHintsSorted(pool);
-  if (!list.length || (hideWhileWaiting && waitingForHints() && !picked)) {
-    el.hidden = true;
-    el.innerHTML = "";
-    el.classList.remove("is-revealed");
-    return;
-  }
+  const hideInfo = !list.length || (hideWhileWaiting && waitingForHints() && !picked);
   el.hidden = false;
-  el.classList.toggle("is-revealed", Boolean(picked));
-  el.style.setProperty("--preview-n", String(list.length));
-  el.innerHTML = list
-    .map((hint, i) => {
-      const kind = hintRankKind(hint, pool) || "normal";
-      const isPicked = Boolean(picked) && hint.uci === picked;
-      const pickedCls = isPicked ? " is-picked" : "";
-      const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
-      const san = picked
-        ? `<span class="board-preview-san">${escapeHtml(previewHintSan(hint, sanFen))}</span>`
-        : `<span class="board-preview-san is-hidden" aria-hidden="true"></span>`;
-      return `<div class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
+  el.removeAttribute("hidden");
+  el.removeAttribute("aria-busy");
+  el.classList.toggle("is-revealed", Boolean(picked) && !hideInfo);
+  el.style.setProperty("--preview-n", String(PREVIEW_SLOTS));
+  const slots = [];
+  for (let i = 0; i < PREVIEW_SLOTS; i += 1) {
+    const hint = hideInfo ? null : list[i];
+    if (!hint) {
+      slots.push(emptyPreviewItemHtml());
+      continue;
+    }
+    const kind = hintRankKind(hint, pool) || "normal";
+    const isPicked = Boolean(picked) && hint.uci === picked;
+    const pickedCls = isPicked ? " is-picked" : "";
+    const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
+    const san = picked
+      ? `<span class="board-preview-san">${escapeHtml(previewHintSan(hint, sanFen))}</span>`
+      : `<span class="board-preview-san is-hidden" aria-hidden="true"></span>`;
+    slots.push(`<div class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
         <span class="board-preview-top">
           <span class="board-preview-place">${escapeHtml(formatPlace(i + 1))}${star}</span>
           ${san}
         </span>
         <span class="board-preview-eval">${previewEvalHtml(hint, evalPool)}</span>
-      </div>`;
-    })
-    .join("");
+      </div>`);
+  }
+  el.innerHTML = slots.join("");
   bindPreviewInspect(el);
 }
 
@@ -3466,7 +3473,7 @@ function boardOppPreviewEl() {
   const el = document.createElement("div");
   el.id = "board-opp-preview";
   el.className = "board-move-preview is-opp";
-  el.hidden = true;
+  el.hidden = false;
   el.setAttribute("aria-label", t("board.preview.opp"));
   if (stage) stage.insertAdjacentElement("beforebegin", el);
   els.boardOppPreview = el;
@@ -3477,8 +3484,7 @@ function renderOppMovePreview() {
   const el = boardOppPreviewEl();
   if (!el) return;
   if (!state.oppPreviewing || !(state.oppHintPool || []).length) {
-    el.hidden = true;
-    el.innerHTML = "";
+    paintMovePreview(el, [], "");
     return;
   }
   paintMovePreview(el, state.oppHintPool, state.oppPickedUci, { evalPool: state.oppHintPool });
@@ -3541,7 +3547,7 @@ function bindPreviewInspect(el) {
   el.dataset.previewBound = "1";
   el.addEventListener("pointerover", (event) => {
     const item = event.target.closest(".board-preview-item");
-    if (!item || !el.classList.contains("is-revealed")) return;
+    if (!item || item.classList.contains("is-empty") || !el.classList.contains("is-revealed")) return;
     el.querySelectorAll(".board-preview-item.is-focus").forEach((node) => node.classList.remove("is-focus"));
     item.classList.add("is-focus");
     showPreviewFocusArrows(item.dataset.uci, { opp: previewInspectSide(el) === "opp" });
@@ -3553,7 +3559,7 @@ function bindPreviewInspect(el) {
   });
   el.addEventListener("click", (event) => {
     const item = event.target.closest(".board-preview-item");
-    if (!item || !el.classList.contains("is-revealed")) return;
+    if (!item || item.classList.contains("is-empty") || !el.classList.contains("is-revealed")) return;
     showPreviewFocusArrows(item.dataset.uci, { opp: previewInspectSide(el) === "opp" });
   });
 }
@@ -3563,11 +3569,7 @@ function clearOppPreview({ keepArrows = false } = {}) {
   state.oppPickedUci = "";
   state.oppPreviewing = false;
   const el = els.boardOppPreview || document.getElementById("board-opp-preview");
-  if (el) {
-    el.hidden = true;
-    el.innerHTML = "";
-    el.classList.remove("is-revealed");
-  }
+  if (el) paintMovePreview(el, [], "");
   if (!keepArrows && !isTrainHold() && state.board && !playerIsSideToMove()) {
     state.board.setArrows([]);
   }
@@ -3629,10 +3631,8 @@ async function computeOppHintPool(game) {
 function showOppPreviewThinking() {
   const el = boardOppPreviewEl();
   if (!el) return;
-  el.hidden = false;
-  el.classList.remove("is-revealed");
-  el.style.setProperty("--preview-n", "1");
-  el.innerHTML = `<div class="board-preview-item is-thinking">${escapeHtml(t("opp.analyze"))}</div>`;
+  paintMovePreview(el, [], "");
+  el.setAttribute("aria-busy", "true");
 }
 
 async function beginOppPreview(fen) {
@@ -8378,6 +8378,7 @@ state.kingReplay = { type: "boot" };
 speakKing(t("king.boot"), { calculating: true });
 els.hints.innerHTML = "";
 renderHints();
+renderOppMovePreview();
 
 Promise.all([
   state.engine.ready,

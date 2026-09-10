@@ -2,12 +2,26 @@
     <main class="game is-eval-side">
       <section class="board-col">
         <div class="board-with-eval">
-          <div id="board-opp-preview" class="board-move-preview is-opp" hidden data-i18n-aria="board.preview.opp" aria-label="Anteprima delle mosse dell'avversario"></div>
+          <div id="board-opp-preview" class="board-move-preview is-opp" data-i18n-aria="board.preview.opp" aria-label="Anteprima delle mosse dell'avversario">
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+          </div>
           <div class="board-stage">
             <div id="board-root"></div>
             <p id="board-pick-note" class="board-pick-note" hidden></p>
           </div>
-          <div id="board-move-preview" class="board-move-preview" hidden data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite"></div>
+          <div id="board-move-preview" class="board-move-preview" data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite">
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+            <div class="board-preview-item is-empty" aria-hidden="true"></div>
+          </div>
           <div id="opening-intro" class="opening-intro" hidden>
             <div id="opening-intro-bar" class="opening-intro-bar" role="progressbar" data-i18n-aria="opening.intro.aria" aria-label="Caricamento della partita" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
               <i id="opening-intro-fill"></i>

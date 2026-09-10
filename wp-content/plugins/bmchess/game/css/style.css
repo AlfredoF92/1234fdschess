@@ -328,9 +328,6 @@ body.is-opening-intro .train-actions,
 body.is-opening-intro .board-move-preview {
   pointer-events: none;
 }
-body.is-opening-intro .board-move-preview {
-  display: none;
-}
 
 .coach-col {
   display: flex;
@@ -409,7 +406,7 @@ body.is-opening-intro .board-move-preview {
   margin: 0 0 4px;
 }
 .board-move-preview[hidden] {
-  display: none;
+  display: grid;
 }
 .board-preview-item {
   appearance: none;
@@ -435,14 +432,12 @@ body.is-opening-intro .board-move-preview {
   box-shadow: none;
   text-shadow: none;
 }
-.board-preview-item.is-thinking {
-  grid-column: 1 / -1;
-  min-height: 48px;
-  color: #b0b0b0;
-  font-size: 13px;
-  font-weight: 700;
+.board-preview-item.is-empty {
+  background: transparent;
+  border-color: #3a3a3a;
+  box-shadow: none;
+  color: transparent;
   pointer-events: none;
-  cursor: default;
 }
 .board-preview-item.is-best {
   border-color: #3a3a3a;
