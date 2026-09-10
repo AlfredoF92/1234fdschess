@@ -72,6 +72,12 @@ body.bmchess-has-game .bmchess-root .board-preview-item:focus,
 	pointer-events: none !important;
 }
 
+body.bmchess-has-game .bmchess-root .board-move-preview.is-revealed .board-preview-item,
+.elementor .bmchess-root .board-move-preview.is-revealed .board-preview-item {
+	pointer-events: auto !important;
+	cursor: pointer !important;
+}
+
 body.bmchess-has-game .bmchess-root .board-preview-item.is-best,
 .elementor .bmchess-root .board-preview-item.is-best {
 	background-color: #1a1a1a !important;
@@ -87,8 +93,8 @@ body.bmchess-has-game .bmchess-root .board-preview-item.is-picked:hover,
 	box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.45) !important;
 }
 
-body.bmchess-has-game .bmchess-root .board-preview-item:not(.is-picked) .board-preview-san,
-.elementor .bmchess-root .board-preview-item:not(.is-picked) .board-preview-san {
+body.bmchess-has-game .bmchess-root .board-move-preview:not(.is-revealed) .board-preview-san,
+.elementor .bmchess-root .board-move-preview:not(.is-revealed) .board-preview-san {
 	display: none !important;
 }
 

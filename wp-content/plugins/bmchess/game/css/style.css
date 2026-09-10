@@ -440,6 +440,14 @@ body.is-opening-intro .board-move-preview {
   box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.45);
   color: #ececec;
 }
+.board-move-preview.is-revealed .board-preview-item {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.board-preview-item.is-focus:not(.is-picked) {
+  border-color: #6a8f45;
+  background: #202818;
+}
 .board-preview-top {
   display: flex;
   flex-wrap: wrap;
@@ -480,7 +488,7 @@ body.is-opening-intro .board-move-preview {
 .board-preview-san.is-hidden {
   display: none;
 }
-.board-preview-item:not(.is-picked) .board-preview-san {
+.board-move-preview:not(.is-revealed) .board-preview-san {
   display: none;
 }
 .board-preview-eval {

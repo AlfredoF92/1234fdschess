@@ -3340,15 +3340,36 @@ function boardMovePreviewEl() {
   return el;
 }
 
-function paintMovePreview(el, pool, picked, { evalPool = null, hideWhileWaiting = false } = {}) {
+function previewHintSan(hint, fen = "") {
+  const useFen = fen || state.previewFen || (isTrainHold() && state.trainFen) || "";
+  if (useFen && hint?.uci) {
+    try {
+      const game = new Chess(useFen);
+      const move = uciToMove(hint.uci);
+      const played = game.move({
+        from: move.from,
+        to: move.to,
+        promotion: move.promotion || "q",
+      });
+      if (played) return localizeSan(played.san);
+    } catch {
+      /* fall through */
+    }
+  }
+  return hintSan(hint);
+}
+
+function paintMovePreview(el, pool, picked, { evalPool = null, hideWhileWaiting = false, sanFen = "" } = {}) {
   if (!el) return;
   const list = previewHintsSorted(pool);
   if (!list.length || (hideWhileWaiting && waitingForHints() && !picked)) {
     el.hidden = true;
     el.innerHTML = "";
+    el.classList.remove("is-revealed");
     return;
   }
   el.hidden = false;
+  el.classList.toggle("is-revealed", Boolean(picked));
   el.style.setProperty("--preview-n", String(list.length));
   el.innerHTML = list
     .map((hint, i) => {
@@ -3356,8 +3377,8 @@ function paintMovePreview(el, pool, picked, { evalPool = null, hideWhileWaiting 
       const isPicked = Boolean(picked) && hint.uci === picked;
       const pickedCls = isPicked ? " is-picked" : "";
       const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
-      const san = isPicked
-        ? `<span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>`
+      const san = picked
+        ? `<span class="board-preview-san">${escapeHtml(previewHintSan(hint, sanFen))}</span>`
         : `<span class="board-preview-san is-hidden" aria-hidden="true"></span>`;
       return `<div class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
         <span class="board-preview-top">
@@ -3368,6 +3389,7 @@ function paintMovePreview(el, pool, picked, { evalPool = null, hideWhileWaiting 
       </div>`;
     })
     .join("");
+  bindPreviewInspect(el);
 }
 
 function renderBoardMovePreview() {
@@ -3377,7 +3399,8 @@ function renderBoardMovePreview() {
   if (live.length) state.previewSnap = live.slice();
   const pool = live.length ? live : state.previewSnap || [];
   const picked = state.trainPickedUci || state.lastPickedUci || "";
-  paintMovePreview(el, pool, picked, { hideWhileWaiting: true });
+  paintMovePreview(el, pool, picked, { hideWhileWaiting: true, sanFen: state.previewFen || state.trainFen || "" });
+  if (picked && !state.oppPreviewing && !isTrainHold()) showPreviewFocusArrows("");
 }
 
 function boardOppPreviewEl() {
@@ -3409,6 +3432,80 @@ function renderOppMovePreview() {
   paintMovePreview(el, state.oppHintPool, state.oppPickedUci, { evalPool: state.oppHintPool });
 }
 
+function previewInspectSide(el) {
+  return el?.classList.contains("is-opp") ? "opp" : "you";
+}
+
+function restorePreviewArrows(side) {
+  if (side === "opp") {
+    showOppHintArrows();
+    return;
+  }
+  if (isTrainHold() && state.reviewArrows) {
+    paintHoldArrows();
+    return;
+  }
+  showPreviewFocusArrows("", { opp: false });
+}
+
+function showPreviewFocusArrows(uci, { opp = false } = {}) {
+  if (!state.board) return;
+  if (opp) {
+    showOppHintArrows(uci);
+    return;
+  }
+  if (isTrainHold() && state.reviewArrows) {
+    const idx = (state.hints || []).findIndex((hint) => hint?.uci === uci);
+    paintHoldArrows(idx >= 0 ? idx : null);
+    return;
+  }
+  const pool = (state.previewSnap || []).length ? state.previewSnap : state.hintPool;
+  const list = previewHintsSorted(pool);
+  const picked = state.trainPickedUci || state.lastPickedUci || "";
+  if (!list.length) {
+    state.board.setArrows([]);
+    return;
+  }
+  state.board.setArrows(
+    list
+      .filter((hint) => hint?.uci && hint.uci.length >= 4)
+      .map((hint) => {
+        const isFocus = Boolean(uci) && hint.uci === uci;
+        const isPick = Boolean(picked) && hint.uci === picked;
+        return {
+          from: hint.uci.slice(0, 2),
+          to: hint.uci.slice(2, 4),
+          color: ARROW_GREEN,
+          opacity: isFocus ? 0.95 : isPick ? 0.72 : 0.28,
+          width: isFocus ? "0.26" : isPick ? "0.18" : "0.11",
+          label: isFocus || isPick ? previewHintSan(hint) : "",
+        };
+      })
+  );
+}
+
+function bindPreviewInspect(el) {
+  if (!el || el.dataset.previewBound === "1") return;
+  el.dataset.previewBound = "1";
+  el.addEventListener("pointerover", (event) => {
+    const item = event.target.closest(".board-preview-item");
+    if (!item || !el.classList.contains("is-revealed")) return;
+    el.querySelectorAll(".board-preview-item.is-focus").forEach((node) => node.classList.remove("is-focus"));
+    item.classList.add("is-focus");
+    showPreviewFocusArrows(item.dataset.uci, { opp: previewInspectSide(el) === "opp" });
+  });
+  el.addEventListener("pointerout", (event) => {
+    if (event.relatedTarget && el.contains(event.relatedTarget)) return;
+    el.querySelectorAll(".board-preview-item.is-focus").forEach((node) => node.classList.remove("is-focus"));
+    restorePreviewArrows(previewInspectSide(el));
+  });
+  el.addEventListener("click", (event) => {
+    const item = event.target.closest(".board-preview-item");
+    if (!item || !el.classList.contains("is-revealed")) return;
+    showPreviewFocusArrows(item.dataset.uci, { opp: previewInspectSide(el) === "opp" });
+  });
+}
+
 function clearOppPreview({ keepArrows = false } = {}) {
   state.oppHintPool = [];
   state.oppPickedUci = "";
@@ -3417,6 +3514,7 @@ function clearOppPreview({ keepArrows = false } = {}) {
   if (el) {
     el.hidden = true;
     el.innerHTML = "";
+    el.classList.remove("is-revealed");
   }
   if (!keepArrows && !isTrainHold() && state.board && !playerIsSideToMove()) {
     state.board.setArrows([]);
@@ -3437,7 +3535,7 @@ function ensureOppPickInPool(pool, uci) {
   return next;
 }
 
-function showOppHintArrows() {
+function showOppHintArrows(focusUci = "") {
   if (!state.board) return;
   if (!state.aids.moves || !state.oppPreviewing) {
     return;
@@ -3449,13 +3547,14 @@ function showOppHintArrows() {
       .filter((hint) => hint?.uci && hint.uci.length >= 4)
       .map((hint) => {
         const isPick = Boolean(picked) && hint.uci === picked;
+        const isFocus = Boolean(focusUci) && hint.uci === focusUci;
         return {
           from: hint.uci.slice(0, 2),
           to: hint.uci.slice(2, 4),
           color: ARROW_GREEN,
-          opacity: picked ? (isPick ? 0.95 : 0.32) : 0.64,
-          width: picked ? (isPick ? "0.24" : "0.11") : "0.15",
-          label: isPick ? hintSan(hint) : "",
+          opacity: isFocus ? 0.95 : picked ? (isPick ? 0.72 : 0.28) : 0.64,
+          width: isFocus ? "0.26" : picked ? (isPick ? "0.18" : "0.11") : "0.15",
+          label: isFocus || isPick ? previewHintSan(hint) : "",
         };
       })
   );
@@ -5028,6 +5127,7 @@ const state = {
   hints: [],
   hintPool: [],
   previewSnap: [],
+  previewFen: "",
   lastPickedUci: "",
   oppHintPool: [],
   oppPickedUci: "",
@@ -6392,7 +6492,10 @@ async function applyUserMove(from, to, promotion, chosenHint) {
   }
   state.engine.stop();
   state.lastPickedUci = chosen?.uci || `${from}${to}${promotion || ""}`;
-  if ((state.hintPool || []).length) state.previewSnap = state.hintPool.slice();
+  if ((state.hintPool || []).length) {
+    state.previewSnap = state.hintPool.slice();
+    state.previewFen = fen;
+  }
   if (trainReview) {
     stopMoveClock();
     revealTrainPick();
@@ -7743,6 +7846,7 @@ function startGame(playerColor = state.playerColor) {
   hideOpeningIntro();
   hideBoardPickNote();
   state.previewSnap = [];
+  state.previewFen = "";
   state.lastPickedUci = "";
   state.oppPreviewToken += 1;
   clearOppPreview();
