@@ -3305,8 +3305,43 @@ function previewEvalHtml(hint) {
   return `${arrow}<span>${escapeHtml(text)}</span>`;
 }
 
+function boardMovePreviewEl() {
+  if (els.boardMovePreview) return els.boardMovePreview;
+  const existing = document.getElementById("board-move-preview");
+  if (existing) {
+    els.boardMovePreview = existing;
+    return existing;
+  }
+  const stage = document.querySelector(".board-stage") || els.boardRoot?.parentElement;
+  if (!stage) return null;
+  const el = document.createElement("div");
+  el.id = "board-move-preview";
+  el.className = "board-move-preview";
+  el.hidden = true;
+  el.setAttribute("aria-label", t("board.preview"));
+  stage.insertAdjacentElement("afterend", el);
+  els.boardMovePreview = el;
+  el.addEventListener("click", onBoardPreviewClick);
+  return el;
+}
+
+function onBoardPreviewClick(event) {
+  const btn = event.target.closest("[data-uci]");
+  if (!btn || isTrainHold() || isHintFakeLoad() || state.busy) return;
+  const uci = btn.dataset.uci;
+  const index = (state.hints || []).findIndex((hint) => hint?.uci === uci);
+  if (index >= 0) {
+    playHintAt(index);
+    return;
+  }
+  const hint = (state.hintPool || []).find((item) => item.uci === uci);
+  if (!hint) return;
+  const move = uciToMove(hint.uci);
+  playHintMove(move.from, move.to);
+}
+
 function renderBoardMovePreview() {
-  const el = els.boardMovePreview;
+  const el = boardMovePreviewEl();
   if (!el) return;
   const live = (state.hintPool || []).filter((hint) => hint?.uci && !hint.synthetic);
   if (live.length) state.previewSnap = live.slice();
@@ -6340,20 +6375,7 @@ els.hints.addEventListener("click", (event) => {
   playHintAt(Number(btn.dataset.index));
 });
 
-els.boardMovePreview?.addEventListener("click", (event) => {
-  const btn = event.target.closest("[data-uci]");
-  if (!btn || isTrainHold() || isHintFakeLoad() || state.busy) return;
-  const uci = btn.dataset.uci;
-  const index = (state.hints || []).findIndex((hint) => hint?.uci === uci);
-  if (index >= 0) {
-    playHintAt(index);
-    return;
-  }
-  const hint = (state.hintPool || []).find((item) => item.uci === uci);
-  if (!hint) return;
-  const move = uciToMove(hint.uci);
-  playHintMove(move.from, move.to);
-});
+els.boardMovePreview?.addEventListener("click", onBoardPreviewClick);
 
 document.addEventListener("keydown", (event) => {
   if (event.altKey || event.ctrlKey || event.metaKey) return;

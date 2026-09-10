@@ -139,7 +139,9 @@ function bmchess_render_home( $atts = array() ) {
 	$game_url = bmchess_game_url();
 	ob_start();
 	echo '<script>' . bmchess_boot_script() . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	include BMCHESS_DIR . 'templates/game.php';
+	$game_tpl = BMCHESS_DIR . 'templates/game.php';
+	$game_fb  = BMCHESS_DIR . 'includes/game-view.php';
+	include ( is_readable( $game_tpl ) && filesize( $game_tpl ) > 200 ) ? $game_tpl : $game_fb;
 	return ob_get_clean();
 }
 
