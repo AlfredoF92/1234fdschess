@@ -413,33 +413,28 @@ body.is-opening-intro .board-move-preview {
   min-height: clamp(56px, 15cqi, 78px);
   padding: 8px 4px;
   padding: clamp(6px, 1.5cqi, 10px) clamp(2px, 0.8cqi, 6px);
-  border: 1px solid #3a3a3a;
+  border: 2px solid #3a3a3a;
   border-radius: 8px;
   background: #1a1a1a;
   color: #ececec;
-  cursor: pointer;
+  cursor: default;
+  pointer-events: none;
+  user-select: none;
   box-shadow: none;
   text-shadow: none;
 }
-.board-preview-item:hover {
-  border-color: #6a6a6a;
-  background: #242424;
-  color: #ececec;
-}
 .board-preview-item.is-best {
-  border-color: var(--best);
-  background: #1c2414;
+  border-color: #3a3a3a;
+  background: #1a1a1a;
 }
 .board-preview-item.is-worst {
-  opacity: 0.9;
+  opacity: 0.92;
 }
-.board-preview-item.is-picked,
-.board-preview-item.is-picked:hover {
-  outline: 2px solid var(--green);
-  outline-offset: 0;
+.board-preview-item.is-picked {
+  outline: none;
   background: #243018;
   border-color: #7cb342;
-  box-shadow: 0 0 0 1px #7cb342;
+  box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.45);
   color: #ececec;
 }
 .board-preview-top {
@@ -478,6 +473,12 @@ body.is-opening-intro .board-move-preview {
   text-overflow: ellipsis;
   max-width: 100%;
   color: #f2f2f2;
+}
+.board-preview-san.is-hidden {
+  display: none;
+}
+.board-preview-item:not(.is-picked) .board-preview-san {
+  display: none;
 }
 .board-preview-eval {
   display: inline-flex;

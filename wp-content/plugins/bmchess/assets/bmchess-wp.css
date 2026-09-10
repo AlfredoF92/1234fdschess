@@ -67,13 +67,15 @@ body.bmchess-has-game .bmchess-root .board-preview-item:focus,
 .elementor .bmchess-root .board-preview-item {
 	color: #ececec !important;
 	background-color: #1a1a1a !important;
-	border: 1px solid #3a3a3a !important;
+	border: 2px solid #3a3a3a !important;
+	cursor: default !important;
+	pointer-events: none !important;
 }
 
 body.bmchess-has-game .bmchess-root .board-preview-item.is-best,
 .elementor .bmchess-root .board-preview-item.is-best {
-	background-color: #1c2414 !important;
-	border-color: #9ccc65 !important;
+	background-color: #1a1a1a !important;
+	border-color: #3a3a3a !important;
 }
 
 body.bmchess-has-game .bmchess-root .board-preview-item.is-picked,
@@ -82,6 +84,12 @@ body.bmchess-has-game .bmchess-root .board-preview-item.is-picked:hover,
 	color: #ececec !important;
 	background-color: #243018 !important;
 	border-color: #7cb342 !important;
+	box-shadow: 0 0 0 2px rgba(124, 179, 66, 0.45) !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-item:not(.is-picked) .board-preview-san,
+.elementor .bmchess-root .board-preview-item:not(.is-picked) .board-preview-san {
+	display: none !important;
 }
 
 body.bmchess-has-game .bmchess-root .board-preview-place,

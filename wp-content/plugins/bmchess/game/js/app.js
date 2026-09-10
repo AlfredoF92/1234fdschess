@@ -3321,23 +3321,7 @@ function boardMovePreviewEl() {
   el.setAttribute("aria-label", t("board.preview"));
   stage.insertAdjacentElement("afterend", el);
   els.boardMovePreview = el;
-  el.addEventListener("click", onBoardPreviewClick);
   return el;
-}
-
-function onBoardPreviewClick(event) {
-  const btn = event.target.closest("[data-uci]");
-  if (!btn || isTrainHold() || isHintFakeLoad() || state.busy) return;
-  const uci = btn.dataset.uci;
-  const index = (state.hints || []).findIndex((hint) => hint?.uci === uci);
-  if (index >= 0) {
-    playHintAt(index);
-    return;
-  }
-  const hint = (state.hintPool || []).find((item) => item.uci === uci);
-  if (!hint) return;
-  const move = uciToMove(hint.uci);
-  playHintMove(move.from, move.to);
 }
 
 function renderBoardMovePreview() {
@@ -3358,15 +3342,19 @@ function renderBoardMovePreview() {
   el.innerHTML = list
     .map((hint, i) => {
       const kind = hintRankKind(hint, pool) || "normal";
-      const pickedCls = hint.uci === picked ? " is-picked" : "";
+      const isPicked = hint.uci === picked;
+      const pickedCls = isPicked ? " is-picked" : "";
       const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
-      return `<button type="button" class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
+      const san = isPicked
+        ? `<span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>`
+        : `<span class="board-preview-san is-hidden" aria-hidden="true"></span>`;
+      return `<div class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
         <span class="board-preview-top">
           <span class="board-preview-place">${escapeHtml(formatPlace(i + 1))}${star}</span>
-          <span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>
+          ${san}
         </span>
         <span class="board-preview-eval">${previewEvalHtml(hint)}</span>
-      </button>`;
+      </div>`;
     })
     .join("");
 }
@@ -6376,8 +6364,6 @@ els.hints.addEventListener("click", (event) => {
   if (!btn || btn.disabled || isTrainHold() || isHintFakeLoad() || !state.cardClick) return;
   playHintAt(Number(btn.dataset.index));
 });
-
-els.boardMovePreview?.addEventListener("click", onBoardPreviewClick);
 
 document.addEventListener("keydown", (event) => {
   if (event.altKey || event.ctrlKey || event.metaKey) return;
