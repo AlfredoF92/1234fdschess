@@ -26,8 +26,10 @@ const EVAL_BAR_BLOCK_ONLY_KEY = "5minchess.evalBarBlockOnly";
 const EVAL_BAR_STYLE_KEY = "5minchess.evalBarStyle";
 const HINT_FAKE_LOAD_MS = 3000;
 const OPP_REPLY_MIN_MS = 10000;
-const OPP_PREVIEW_SHOW_MS = 900;
-const OPP_PREVIEW_PICK_MS = 750;
+const OPP_ANALYZE_MS = 6000;
+const OPP_PREVIEW_SHOW_MS = 4000;
+const OPP_PREVIEW_THINK_MS = 4000;
+const OPP_PREVIEW_PICK_MS = 800;
 const KING_TALK_HIDE = {
   hintMix: true,
   oppMoveDetail: true,
@@ -3565,7 +3567,7 @@ async function computeOppHintPool(game) {
   const prevEval = state.gameEval;
   const prevNext = state.nextStandEval;
   try {
-    const pool = await computeHintPool(game, { movetime: 1800, freezeStand: true });
+    const pool = await computeHintPool(game, { movetime: OPP_ANALYZE_MS, freezeStand: true });
     return (pool || []).filter((hint) => hint?.uci);
   } finally {
     state.hintBestScore = prevBest;
@@ -3574,11 +3576,21 @@ async function computeOppHintPool(game) {
   }
 }
 
+function showOppPreviewThinking() {
+  const el = boardOppPreviewEl();
+  if (!el) return;
+  el.hidden = false;
+  el.classList.remove("is-revealed");
+  el.style.setProperty("--preview-n", "1");
+  el.innerHTML = `<div class="board-preview-item is-thinking">${escapeHtml(t("opp.analyze"))}</div>`;
+}
+
 async function beginOppPreview(fen) {
   if (isLocalVsHuman() || !fen) return;
   const game = new Chess(fen);
   if (game.game_over() || game.turn() === state.playerColor) return;
   const token = ++state.oppPreviewToken;
+  showOppPreviewThinking();
   try {
     const pool = await computeOppHintPool(game);
     if (token !== state.oppPreviewToken || state.game.fen() !== fen) return;
@@ -6147,16 +6159,26 @@ async function resolveOppMove(fen) {
     try {
       await beginOppPreview(fen);
       if (state.game.fen() === fen && state.oppPreviewing) {
-        await sleep(firstEngine ? 550 : OPP_PREVIEW_SHOW_MS);
+        await sleep(OPP_PREVIEW_SHOW_MS);
       }
     } catch (err) {
       if (err.message === "aborted") throw err;
     }
   }
   let uci = "";
+  const playStarted = Date.now();
+  const playTask = (async () => {
+    try {
+      const played = await state.engine.play(fen, settings);
+      return played?.uci || "";
+    } catch (err) {
+      if (err.message === "aborted") throw err;
+      return "";
+    }
+  })();
+  await waitAtLeast(OPP_PREVIEW_THINK_MS, playStarted);
   try {
-    const played = await state.engine.play(fen, settings);
-    uci = played?.uci || "";
+    uci = await playTask;
   } catch (err) {
     if (err.message === "aborted") throw err;
   }

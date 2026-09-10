@@ -242,7 +242,7 @@
 .game {
   flex: 1;
   display: grid;
-  grid-template-columns: min(calc(100dvh - 132px), calc(100vw - 248px)) 220px;
+  grid-template-columns: min(calc(100dvh - 268px), calc(100vw - 248px)) 220px;
   justify-content: center;
   align-items: start;
   column-gap: 12px;
@@ -412,8 +412,8 @@ body.is-opening-intro .board-move-preview {
   gap: 4px;
   gap: clamp(3px, 0.9cqi, 6px);
   min-width: 0;
-  min-height: 62px;
-  min-height: clamp(56px, 15cqi, 78px);
+  min-height: 52px;
+  min-height: clamp(48px, 11cqi, 64px);
   padding: 8px 4px;
   padding: clamp(6px, 1.5cqi, 10px) clamp(2px, 0.8cqi, 6px);
   border: 2px solid #3a3a3a;
@@ -425,6 +425,15 @@ body.is-opening-intro .board-move-preview {
   user-select: none;
   box-shadow: none;
   text-shadow: none;
+}
+.board-preview-item.is-thinking {
+  grid-column: 1 / -1;
+  min-height: 48px;
+  color: #b0b0b0;
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+  cursor: default;
 }
 .board-preview-item.is-best {
   border-color: #3a3a3a;
@@ -524,8 +533,18 @@ body.is-opening-intro .board-move-preview {
     gap: 2px;
   }
   .board-preview-item {
-    min-height: 58px;
-    padding: 5px 2px;
+    min-height: 48px;
+    padding: 4px 2px;
+  }
+}
+
+@media (max-height: 760px) {
+  .game {
+    grid-template-columns: min(calc(100dvh - 240px), calc(100vw - 248px)) 220px;
+  }
+  .board-preview-item {
+    min-height: 44px;
+    padding: 3px 2px;
   }
 }
 
@@ -3481,7 +3500,7 @@ body.is-local .vs-engine { display: none; }
   .board-col {
     display: flex;
     flex-direction: column;
-    width: min(96vw, calc(100dvh - 120px));
+    width: min(96vw, calc(100dvh - 248px));
     max-width: none;
   }
   .board-col > .side-dock,
