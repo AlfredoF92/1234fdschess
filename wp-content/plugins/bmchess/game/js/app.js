@@ -2476,6 +2476,7 @@ function adoptHintPool(pool, { freezeStand = false } = {}) {
   }
   state.nextStandEval = null;
   state.hintPool = pool || [];
+  if (!freezeStand) state.lastPickedUci = "";
 }
 
 function evalForPlayer(score, game) {
@@ -3285,6 +3286,52 @@ function hintPageCount() {
 
 function visibleHints() {
   return state.hintPool.slice(0, hintPoolSize());
+}
+
+function previewHintsSorted(pool = state.hintPool) {
+  return (pool || [])
+    .filter((hint) => hint?.uci && !hint.synthetic)
+    .slice(0, hintPoolSize())
+    .sort((a, b) => hintScore(b) - hintScore(a) || String(a.uci).localeCompare(String(b.uci)));
+}
+
+function previewEvalHtml(hint) {
+  const dir = hintEvalDir(hint);
+  const arrow = dir ? hintEvalArrowSvg(dir) : "";
+  if (hint?.scoreType === "mate") {
+    return `${arrow}<span>${escapeHtml(formatHintEval(hint))}</span>`;
+  }
+  const text = isAbsLikeEval() ? formatHintEval(hint) : formatHintDelta(hint);
+  return `${arrow}<span>${escapeHtml(text)}</span>`;
+}
+
+function renderBoardMovePreview() {
+  const el = els.boardMovePreview;
+  if (!el) return;
+  const live = (state.hintPool || []).filter((hint) => hint?.uci && !hint.synthetic);
+  if (live.length) state.previewSnap = live.slice();
+  const pool = live.length ? live : state.previewSnap || [];
+  const picked = state.trainPickedUci || state.lastPickedUci || "";
+  const list = previewHintsSorted(pool);
+  if (!list.length || (waitingForHints() && !picked)) {
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
+  el.hidden = false;
+  el.style.setProperty("--preview-n", String(list.length));
+  el.innerHTML = list
+    .map((hint, i) => {
+      const kind = hintRankKind(hint, pool) || "normal";
+      const pickedCls = hint.uci === picked ? " is-picked" : "";
+      const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
+      return `<button type="button" class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
+        <span class="board-preview-place">${escapeHtml(formatPlace(i + 1))}${star}</span>
+        <span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>
+        <span class="board-preview-eval">${previewEvalHtml(hint)}</span>
+      </button>`;
+    })
+    .join("");
 }
 
 function visibleHintDests() {
@@ -4653,6 +4700,7 @@ function needsPromotion(game, from, to) {
 const els = {
   boardRoot: document.getElementById("board-root"),
   boardPickNote: document.getElementById("board-pick-note"),
+  boardMovePreview: document.getElementById("board-move-preview"),
   hints: document.getElementById("hints"),
   statusTitle: document.getElementById("status-title"),
   statusText: document.getElementById("status-text"),
@@ -4810,6 +4858,8 @@ const state = {
   recalcUsedThisTurn: false,
   hints: [],
   hintPool: [],
+  previewSnap: [],
+  lastPickedUci: "",
   hintPage: 0,
   hintsUnlocked: 0,
   hintBestScore: -Infinity,
@@ -5506,6 +5556,7 @@ function renderHints() {
     syncTrainContinue();
     syncHintBoardPlay();
     renderAdminSolutions();
+    renderBoardMovePreview();
     return;
   }
   state.hints = visibleHints();
@@ -5566,6 +5617,7 @@ function renderHints() {
   paintKbdHint();
   syncHintBoardPlay();
   renderAdminSolutions();
+  renderBoardMovePreview();
   if (hold) paintHoldArrows();
 }
 
@@ -6144,6 +6196,8 @@ async function applyUserMove(from, to, promotion, chosenHint) {
     return;
   }
   state.engine.stop();
+  state.lastPickedUci = chosen?.uci || `${from}${to}${promotion || ""}`;
+  if ((state.hintPool || []).length) state.previewSnap = state.hintPool.slice();
   if (trainReview) {
     stopMoveClock();
     revealTrainPick();
@@ -6151,6 +6205,7 @@ async function applyUserMove(from, to, promotion, chosenHint) {
     clearHints();
     hideHintPanel();
     renderHints();
+    renderBoardMovePreview();
   }
   if (!isLocalVsHuman() && !state.game.game_over()) {
     state.oppWaitStartedAt = Date.now();
@@ -6283,6 +6338,21 @@ els.hints.addEventListener("click", (event) => {
   const btn = event.target.closest(".hint-btn");
   if (!btn || btn.disabled || isTrainHold() || isHintFakeLoad() || !state.cardClick) return;
   playHintAt(Number(btn.dataset.index));
+});
+
+els.boardMovePreview?.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-uci]");
+  if (!btn || isTrainHold() || isHintFakeLoad() || state.busy) return;
+  const uci = btn.dataset.uci;
+  const index = (state.hints || []).findIndex((hint) => hint?.uci === uci);
+  if (index >= 0) {
+    playHintAt(index);
+    return;
+  }
+  const hint = (state.hintPool || []).find((item) => item.uci === uci);
+  if (!hint) return;
+  const move = uciToMove(hint.uci);
+  playHintMove(move.from, move.to);
 });
 
 document.addEventListener("keydown", (event) => {
@@ -7485,6 +7555,8 @@ function startGame(playerColor = state.playerColor) {
   stopRecalcProgress();
   hideOpeningIntro();
   hideBoardPickNote();
+  state.previewSnap = [];
+  state.lastPickedUci = "";
   state.lastHintMix = "";
   hideKingFinale();
   if (els.hintMix) {

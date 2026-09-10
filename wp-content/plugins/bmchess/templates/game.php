@@ -73,6 +73,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div id="board-root"></div>
             <p id="board-pick-note" class="board-pick-note" hidden></p>
           </div>
+          <div id="board-move-preview" class="board-move-preview" hidden data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite"></div>
           <div id="eval-bar" class="eval-bar is-blocks" data-i18n-aria="eval.bar" aria-label="Valutazione della posizione" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
             <div class="eval-bar-track" aria-hidden="true">
               <div id="eval-bar-cells" class="eval-bar-cells"></div>

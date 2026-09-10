@@ -298,8 +298,12 @@
   to { opacity: 0; transform: translateY(-6px); }
 }
 body.is-opening-intro .hint-panel,
-body.is-opening-intro .train-actions {
+body.is-opening-intro .train-actions,
+body.is-opening-intro .board-move-preview {
   pointer-events: none;
+}
+body.is-opening-intro .board-move-preview {
+  display: none;
 }
 
 .board-col > #grave-bottom {
@@ -353,6 +357,91 @@ body.is-opening-intro .train-actions {
 @keyframes board-pick-in {
   from { opacity: 0; transform: translate(-50%, calc(-50% + 8px)); }
   to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.board-move-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+  gap: 3px;
+  width: 100%;
+  margin: 2px 0 0;
+}
+.board-move-preview[hidden] {
+  display: none;
+}
+.board-preview-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 3px 2px 4px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #1a1a1a;
+  color: var(--ink);
+  cursor: pointer;
+}
+.board-preview-item.is-best {
+  border-color: var(--best);
+}
+.board-preview-item.is-worst {
+  opacity: 0.82;
+}
+.board-preview-item.is-picked,
+.board-preview-item.is-picked:hover {
+  outline: 2px solid var(--green);
+  outline-offset: 0;
+  background: #243018;
+  box-shadow: 0 0 0 1px #7cb342;
+}
+.board-preview-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  line-height: 1;
+}
+.board-preview-item.is-best .board-preview-place {
+  color: var(--best);
+}
+.board-preview-star {
+  font-size: 9px;
+  color: #e6b000;
+}
+.board-preview-san {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.board-preview-eval {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  color: #c8e89a;
+}
+.board-preview-eval .hint-eval-dir {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+.board-preview-eval .hint-eval-dir.is-down {
+  color: #e07070;
+}
+.board-preview-item.is-worst .board-preview-eval {
+  color: #e07070;
 }
 
 .eval-bar {
