@@ -1,0 +1,127 @@
+<div class="bmchess-root"><div class="page">
+    <main class="game">
+      <section class="board-col">
+        <aside class="panel side-dock">
+          <div class="card is-compact">
+            <div class="dock-row">
+            <div class="player opponent" id="player-top">
+              <span class="dot"></span>
+              <div class="player-king-block">
+                <img id="opp-king" class="player-king" src="__BMCHESS_GAME__pieces/bK.svg" alt="">
+                <div id="opp-lives" class="king-lives player-lives" data-i18n-aria="king.oppLives" aria-label="Cuori del re avversario"></div>
+              </div>
+              <div>
+                <div id="engine-label" class="name">Stockfish 1400 Elo</div>
+                <div id="player-rating-top" class="rating" data-i18n="you.rating">player</div>
+                <div id="game-info" class="game-info">Best 6 | Unlimited time | Mode Best Move</div>
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button id="btn-flip" type="button" data-i18n-title="toolbar.flip" title="Flip the board">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 7h10v2H9v8H7V7zm10 10H7v-2h8V7h2v10z"/></svg>
+              </button>
+              <button id="btn-undo" type="button" data-i18n-title="toolbar.undo" title="Undo the last move">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M10 18l-6-6 6-6v4h8v4h-8v4z"/></svg>
+              </button>
+              <button id="btn-new" type="button" data-i18n-title="toolbar.new" title="New game">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 6v2.5l3.5-3.5L12 1.5V4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6z"/></svg>
+              </button>
+            </div>
+
+            <div id="review-bar" class="review-bar">
+              <div class="review-nav">
+                <button id="btn-review-back" type="button" data-i18n-title="review.back" title="Previous move">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.4 6.4 9.8 12l5.6 5.6L14 19l-7-7 7-7 1.4 1.4z"/></svg>
+                </button>
+                <button id="btn-review-fwd" type="button" data-i18n-title="review.fwd" title="Next move" disabled>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.6 6.4 14.2 12 8.6 17.6 10 19l7-7-7-7-1.4 1.4z"/></svg>
+                </button>
+              </div>
+              <button id="btn-review-live" class="review-live" type="button" data-i18n="review.live" hidden>Torna live</button>
+            </div>
+            <details class="moves-acc">
+              <summary data-i18n="moves.toggle">Moves</summary>
+              <div id="moves" class="moves" data-i18n-aria="moves.aria" aria-label="Move list"></div>
+            </details>
+
+            <div class="actions">
+              <button id="btn-resign" type="button" data-i18n-title="resign" title="Resign">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 3h2v18H6V3zm3 1l10 5-10 5V4z"/></svg>
+                <span data-i18n="resign">Resign</span>
+              </button>
+            </div>
+
+            <div class="player you" id="player-you">
+              <span class="dot"></span>
+              <div>
+                <div id="player-name" class="name" data-i18n="you">You</div>
+                <div id="player-rating" class="rating" data-i18n="you.rating">player</div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </aside>
+        <div id="grave-top" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
+        <div class="board-with-eval">
+          <div class="board-stage">
+            <div id="board-root"></div>
+            <p id="board-pick-note" class="board-pick-note" hidden></p>
+          </div>
+          <div id="board-move-preview" class="board-move-preview" hidden data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite"></div>
+          <div id="eval-bar" class="eval-bar is-blocks" data-i18n-aria="eval.bar" aria-label="Valutazione della posizione" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div class="eval-bar-track" aria-hidden="true">
+              <div id="eval-bar-cells" class="eval-bar-cells"></div>
+              <i id="eval-bar-fill" class="eval-bar-fill"></i>
+              <i id="eval-bar-delta" class="eval-bar-delta" hidden></i>
+            </div>
+            <div id="eval-bar-scale" class="eval-bar-scale" aria-hidden="true"></div>
+            <div class="eval-bar-scores">
+              <span id="eval-bar-score" class="eval-bar-score">0</span>
+              <div id="eval-bar-prev-wrap" class="eval-bar-prev-wrap" hidden>
+                <span id="eval-bar-prev-label" class="eval-bar-prev-label" data-i18n="eval.bar.prev">Previous move</span>
+                <span id="eval-bar-prev" class="eval-bar-prev"></span>
+              </div>
+            </div>
+          </div>
+          <div id="opening-intro" class="opening-intro" hidden>
+            <div id="opening-intro-bar" class="opening-intro-bar" role="progressbar" data-i18n-aria="opening.intro.aria" aria-label="Caricamento della partita" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
+              <i id="opening-intro-fill"></i>
+            </div>
+            <p id="opening-intro-name" class="opening-intro-name"></p>
+            <p id="opening-intro-luck" class="opening-intro-luck" hidden></p>
+          </div>
+        </div>
+        <div id="grave-bottom" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
+      </section>
+
+      <section class="coach-col">
+        <p id="turn-banner" class="turn-banner">Loading</p>
+        <div class="king-talk">
+          <div class="king-side">
+            <img id="king-piece" src="__BMCHESS_GAME__pieces/wK.svg" alt="">
+            <span id="king-react" class="king-react" hidden aria-hidden="true"></span>
+            <strong id="king-title" data-i18n="king">The King</strong>
+            <div class="king-meters">
+              <div id="king-lives" class="king-lives" data-i18n-aria="king.lives" aria-label="How the game stands"></div>
+              <div id="king-sword" class="king-swords" hidden data-i18n-aria="king.sword" aria-label="Danno inflitto all'avversario"></div>
+            </div>
+          </div>
+          <blockquote class="speech" aria-live="polite">
+            <p id="king-note">Good luck!</p>
+            <div id="king-finale" class="king-finale" hidden>
+              <div id="hint-mix" class="hint-mix" hidden></div>
+            </div>
+          </blockquote>
+        </div>
+        <div id="twentieths-lives" class="twentieths-lives" hidden>
+          <div class="twentieths-meter is-you">
+            <span class="twentieths-label" data-i18n="you">You</span>
+            <span id="twentieths-you-count" class="twentieths-count" aria-live="polite" aria-atomic="true">20<span class="twentieths-heart">â™¥</span></span>
+          </div>
+          <div id="twentieths-opp-meter" class="twentieths-meter is-opp">
+            <span class="twentieths-label" data-i18n="opp">Opponent</span>
+            <span id="twentieths-opp-count" class="twentieths-count" aria-live="polite" aria-atomic="true">20<span class="twentieths-heart">â™¥</span></span>
+          </div>
+        </div>
+        <div id="hint-panel" class="hi

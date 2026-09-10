@@ -1,0 +1,109 @@
+-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.score">Numero valutazione</span>
+          <button type="button" id="btn-hint-score-mode" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.hintInfo.scoreAria" aria-label="Mostra il punteggio come numero o come cuori">Numero</button>
+          <div id="hint-score-mode-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div id="hint-overlay-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.hintInfo.overlay">Voglio visualizzare le info della valutazione delle cards dopo che ho scelto</span>
+          <button type="button" id="btn-hint-overlay" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.hintInfo.overlayAria" aria-label="Come mostrare le info di valutazione sulle carte dopo la scelta">Esterna</button>
+          <div id="hint-overlay-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <h3 class="quick-tools-section" data-i18n="tools.evalBar">Barra di valutazione</h3>
+        <div id="eval-bar-style-menu" class="coach-row style-menu is-drop-up">
+          <span class="coach-row-label" data-i18n="tools.evalBar.style">Stile barra</span>
+          <button type="button" id="btn-eval-bar-style" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.evalBar.styleAria" aria-label="Come mostrare la barra di valutazione">A blocchi</button>
+          <div id="eval-bar-style-list" class="style-menu-list" hidden role="menu"></div>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.evalBar.hideDiff">Nascondi differenza</span>
+          <button type="button" id="btn-eval-bar-hide-diff" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.evalBar.hideDiffAria" aria-label="Nascondi il valore della mossa precedente e la differenza sulla barra">Off</button>
+        </div>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.evalBar.blockOnly">Aggiorna solo il blocco</span>
+          <button type="button" id="btn-eval-bar-block-only" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.evalBar.blockOnlyAria" aria-label="Aggiorna la barra solo quando il punteggio supera un blocco da un pedone">Off</button>
+        </div>
+        <h3 class="quick-tools-section is-admin" data-i18n="tools.admin">Impostazioni per ADMIN</h3>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.admin.solutions">Riquadro per admin</span>
+          <button type="button" id="btn-admin-solutions" class="coach-switch" aria-pressed="false" data-i18n-aria="tools.admin.solutionsAria" aria-label="Mostra il riquadro admin">Off</button>
+        </div>
+      </div>
+      <div class="quick-tools-actions">
+        <button type="button" id="btn-quick-tools-close" data-i18n="tools.close">Chiudi</button>
+      </div>
+    </div>
+  </div>
+  <div id="promo" class="promo" hidden></div>
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay-card">
+      <h2 id="overlay-title"></h2>
+      <p id="overlay-text"></p>
+    </div>
+  </div>
+  <div id="new-game" class="new-game" hidden>
+    <div class="new-game-card" role="dialog" aria-modal="true" data-i18n-aria="newgame.title" aria-labelledby="new-game-title">
+      <div class="new-game-tabs" role="tablist" data-i18n-aria="tab.aria" aria-label="Section">
+        <button type="button" class="is-on" role="tab" id="tab-train" data-tab="train" aria-selected="true" aria-controls="panel-train" data-i18n="tab.train">Training</button>
+        <button type="button" role="tab" id="tab-online" data-tab="online" aria-selected="false" aria-controls="panel-online" data-i18n="tab.online">Play online</button>
+        <button type="button" role="tab" id="tab-friend" data-tab="friend" aria-selected="false" aria-controls="panel-friend" data-i18n="tab.friend">Play with a friend</button>
+        <button type="button" role="tab" id="tab-settings" data-tab="settings" aria-selected="false" aria-controls="panel-settings" data-i18n="tab.settings">Settings</button>
+      </div>
+      <h2 id="new-game-title">Training</h2>
+      <select id="play-mode" hidden>
+        <option value="engine" selected>Stockfish</option>
+        <option value="local">Play against an opponent on my PC</option>
+      </select>
+      <div id="panel-train" class="new-game-panel new-game-form" role="tabpanel" data-panel="train" aria-labelledby="tab-train">
+        <label class="skill-wrap" id="skill-row">
+          <span data-i18n="difficulty">Difficulty</span>
+          <select id="skill" data-i18n-aria="skill.aria" aria-label="Stockfish level">
+            <option value="1">1 â€” 1300 Elo</option>
+            <option value="2" selected>2 â€” 1400 Elo</option>
+            <option value="3">3 â€” 1600 Elo</option>
+            <option value="4">4 â€” 1800 Elo</option>
+            <option value="5">5 â€” 2000 Elo</option>
+            <option value="6">6 â€” 2200 Elo</option>
+            <option value="7">7 â€” 2400 Elo</option>
+            <option value="8">8 â€” 2600 Elo</option>
+            <option value="9">9 â€” Full strength</option>
+          </select>
+        </label>
+        <label class="skill-wrap" id="color-row">
+          <span data-i18n="newgame.color">Play as</span>
+          <select id="play-color" data-i18n-aria="newgame.colorAria" aria-label="Your color">
+            <option value="random" selected>Random</option>
+            <option value="w">White</option>
+            <option value="b">Black</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="start.game">Game start</span>
+          <select id="start-kind" data-i18n-aria="start.kindAria" aria-label="Starting type">
+            <option value="standard">Standard</option>
+            <option value="custom" selected>Custom</option>
+          </select>
+        </label>
+        <label class="skill-wrap" id="custom-opening-row">
+          <span data-i18n="start.customPos">Custom position</span>
+          <select id="start-opening" data-i18n-aria="start.aria" aria-label="Starting opening">
+            <option value="random" selected>RANDOM</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="hints.layout">Suggested moves</span>
+          <select id="hint-layout" data-i18n-aria="hints.layoutAria" aria-label="Number of suggested moves">
+            <option value="6x1" selected>The 6 best moves</option>
+            <option value="4x1">The 4 best moves</option>
+            <option value="6x2">2 blocks of 6</option>
+            <option value="4x2">2 blocks of 4</option>
+            <option value="4x3">3 blocks of 4</option>
+          </select>
+        </label>
+        <label class="skill-wrap">
+          <span data-i18n="clock.label">Time per move</span>
+          <select id="move-clock-sec" data-i18n-aria="clock.settingAria" aria-label="Time per move">
+            <option value="0" selected>Unlimited</option>
+            <option value="10">10 seconds (with the best move)</option>
+            <option value="30">30 seconds</option>
+            <option value="45">45 seconds</option>
+            <option value="60">

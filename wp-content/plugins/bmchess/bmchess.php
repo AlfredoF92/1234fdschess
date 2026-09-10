@@ -132,6 +132,30 @@ add_filter(
 	}
 );
 
+function bmchess_print_game( $game_url ) {
+	$tpl = BMCHESS_DIR . 'templates/game.php';
+	if ( is_readable( $tpl ) && filesize( $tpl ) > 200 ) {
+		include $tpl;
+		return;
+	}
+	$html = '';
+	$full = BMCHESS_DIR . 'game/js/game-view.html';
+	if ( is_readable( $full ) && filesize( $full ) > 200 ) {
+		$html = file_get_contents( $full );
+	} else {
+		for ( $i = 1; $i <= 8; $i++ ) {
+			$part = BMCHESS_DIR . "game/js/gv-part{$i}.html";
+			if ( ! is_readable( $part ) || filesize( $part ) < 1 ) {
+				break;
+			}
+			$html .= file_get_contents( $part );
+		}
+	}
+	if ( $html ) {
+		echo str_replace( '__BMCHESS_GAME__', esc_url( $game_url ), $html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+}
+
 function bmchess_render_home( $atts = array() ) {
 	$GLOBALS['bmchess_shortcode_used'] = true;
 	bmchess_enqueue_assets();
@@ -139,9 +163,7 @@ function bmchess_render_home( $atts = array() ) {
 	$game_url = bmchess_game_url();
 	ob_start();
 	echo '<script>' . bmchess_boot_script() . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	$game_tpl = BMCHESS_DIR . 'templates/game.php';
-	$game_fb  = BMCHESS_DIR . 'includes/game-view.php';
-	include ( is_readable( $game_tpl ) && filesize( $game_tpl ) > 200 ) ? $game_tpl : $game_fb;
+	bmchess_print_game( $game_url );
 	return ob_get_clean();
 }
 
