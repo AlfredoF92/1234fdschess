@@ -1,14 +1,3 @@
-="Number of suggested moves">
-              <option value="6x1" selected>The 6 best moves</option>
-              <option value="4x1">The 4 best moves</option>
-              <option value="6x2">2 blocks of 6</option>
-              <option value="4x2">2 blocks of 4</option>
-            </select>
-          </label>
-          <button type="button" id="btn-online-create" class="is-primary online-create" data-i18n="online.create">Crea link</button>
-        </div>
-        <div id="online-share" hidden>
-          <p class="new-game-soon" data-i18n="online.shareHint">Invia questo link all’amico. Quando apre la pagina, la partita inizia.</p>
           <label class="skill-wrap">
             <span data-i18n="online.link">Link della partita</span>
             <input id="online-link" type="text" readonly>
@@ -69,6 +58,14 @@
           </select>
         </label>
         <p class="new-game-soon" data-i18n="settings.evalViewHint">Massima: quanto stai avanti o indietro dopo la mossa. Variazione: rispetto alla best di adesso. Prima della mossa avversaria: quanto recuperi o perdi rispetto a prima che lâ€™avversario muovesse. Variante con spada: stesso numero di quella variazione; i cuori e le spade sotto il Re restano rispetto a 0.</p>
+        <label class="skill-wrap">
+          <span data-i18n="tools.evalBar.place">Posizione barra</span>
+          <select id="eval-bar-place" data-i18n-aria="tools.evalBar.placeAria" aria-label="Dove mostrare la barra di valutazione">
+            <option value="side" selected>Verticale a destra</option>
+            <option value="under">Sotto la scacchiera</option>
+          </select>
+        </label>
+        <p class="new-game-soon" data-i18n="tools.evalBar.placeHint">Di default la barra è verticale a destra, così al centro restano solo scacchiera e caselle.</p>
         <label class="skill-wrap">
           <span data-i18n="settings.storyIcons">Stile cards</span>
           <select id="story-icons" data-i18n-aria="settings.storyIconsAria" aria-label="Stile delle carte delle mosse">

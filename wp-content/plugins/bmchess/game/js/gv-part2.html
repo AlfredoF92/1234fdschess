@@ -1,5 +1,3 @@
-  <span class="twentieths-label" data-i18n="you">You</span>
-            <span id="twentieths-you-count" class="twentieths-count" aria-live="polite" aria-atomic="true">20<span class="twentieths-heart">â™¥</span></span>
           </div>
           <div id="twentieths-opp-meter" class="twentieths-meter is-opp">
             <span class="twentieths-label" data-i18n="opp">Opponent</span>
@@ -51,6 +49,8 @@
         <div class="coach-tools">
           <button type="button" id="btn-quick-tools" class="coach-tools-open" data-i18n="tools.quick" aria-haspopup="dialog" aria-controls="quick-tools" aria-expanded="false">Impostazioni rapide</button>
         </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -85,4 +85,8 @@
         <div class="coach-row">
           <span class="coach-row-label" data-i18n="aid.threats">Evidenzia i pezzi minacciati</span>
           <button type="button" id="btn-aid-threats" class="coach-switch" aria-pressed="false">Off</button>
-        <
+        </div>
+        <div id="card-style-menu" class="coach-row style-menu">
+          <span class="coach-row-label" data-i18n="settings.storyIcons">Stile cards</span>
+          <button type="button" id="btn-card-style" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="settings.storyIconsAria" aria-label="Stile delle carte delle mosse">War</button>
+          <div id="card-style-list" class="style-menu-list" hidden role="menu"></div>

@@ -2,7 +2,7 @@ import { Chess, SQUARES } from "./chess.min.js";
 import { Engine } from "./engine.js?v=20260827elo13";
 import { Board } from "./board.js?v=20260828ctr";
 import { loadOpenings, describePosition, START_OPENINGS } from "./openings.js";
-import { applyStaticI18n, getLang, t } from "./i18n.js?v=20260828adm";
+import { applyStaticI18n, getLang, t } from "./i18n.js?v=20260911bar";
 
 function asset(path) {
   const base = (typeof window !== "undefined" && window.BMCHESS_BASE)
@@ -24,6 +24,7 @@ const REVIEW_ARROW_LABELS_KEY = "5minchess.reviewArrowLabels";
 const EVAL_BAR_HIDE_DIFF_KEY = "5minchess.evalBarHideDiff";
 const EVAL_BAR_BLOCK_ONLY_KEY = "5minchess.evalBarBlockOnly";
 const EVAL_BAR_STYLE_KEY = "5minchess.evalBarStyle";
+const EVAL_BAR_PLACE_KEY = "5minchess.evalBarPlace";
 const HINT_FAKE_LOAD_MS = 3000;
 const OPP_REPLY_MIN_MS = 10000;
 const OPP_ANALYZE_MS = 6000;
@@ -310,6 +311,20 @@ function evalBarStyle() {
   const value = state.evalBarStyle;
   if (value === "standard" || value === "blocks" || value === "icons" || value === "hearts") return value;
   return "blocks";
+}
+
+function readEvalBarPlace() {
+  try {
+    const saved = localStorage.getItem(EVAL_BAR_PLACE_KEY);
+    if (saved === "under" || saved === "side") return saved;
+  } catch {
+    /* ignore */
+  }
+  return "side";
+}
+
+function evalBarIsVertical() {
+  return state.evalBarPlace !== "under";
 }
 
 function readRoundEval() {
@@ -3045,6 +3060,7 @@ function evalBarScaleTicks() {
 
 function ensureEvalBarChrome() {
   const style = evalBarStyle();
+  const place = evalBarIsVertical() ? "side" : "under";
   const cells = els.evalBarCells;
   if (cells) {
     if (!cells.childElementCount) {
@@ -3061,8 +3077,9 @@ function ensureEvalBarChrome() {
     });
   }
   const scale = els.evalBarScale;
-  if (scale && scale.dataset.barStyle !== style) {
+  if (scale && (scale.dataset.barStyle !== style || scale.dataset.barPlace !== place)) {
     scale.dataset.barStyle = style;
+    scale.dataset.barPlace = place;
     scale.innerHTML = "";
     for (const tick of evalBarScaleTicks()) {
       const el = document.createElement("span");
@@ -3071,7 +3088,13 @@ function ensureEvalBarChrome() {
       if (tick.edge === "start") el.classList.add("is-start");
       if (tick.edge === "end") el.classList.add("is-end");
       el.textContent = tick.text;
-      el.style.left = `${tick.left}%`;
+      if (place === "side") {
+        el.style.left = "";
+        el.style.bottom = `${tick.left}%`;
+      } else {
+        el.style.bottom = "";
+        el.style.left = `${tick.left}%`;
+      }
       scale.appendChild(el);
     }
   }
@@ -3148,10 +3171,26 @@ function paintEvalBar() {
   els.evalBar?.classList.toggle("is-blocks", style === "blocks");
   els.evalBar?.classList.toggle("is-icons", style === "icons");
   els.evalBar?.classList.toggle("is-hearts", style === "hearts");
+  els.evalBar?.classList.toggle("is-vertical", evalBarIsVertical());
   paintEvalBarCells(pct);
   if (fill) {
-    fill.style.height = "100%";
-    fill.style.width = `${pct.toFixed(2)}%`;
+    if (evalBarIsVertical()) {
+      fill.style.width = "100%";
+      fill.style.height = `${pct.toFixed(2)}%`;
+      fill.style.left = "0";
+      fill.style.right = "0";
+      fill.style.top = "auto";
+      fill.style.bottom = "0";
+      fill.style.setProperty("--fill", `${pct.toFixed(2)}%`);
+    } else {
+      fill.style.height = "100%";
+      fill.style.width = `${pct.toFixed(2)}%`;
+      fill.style.left = "0";
+      fill.style.right = "auto";
+      fill.style.top = "0";
+      fill.style.bottom = "0";
+      fill.style.removeProperty("--fill");
+    }
   }
   if (label) {
     const pawn = isPrevOppEval() && Number.isFinite(shown) && Math.abs(shown) < 50000 && !state.game?.in_checkmate();
@@ -3184,8 +3223,19 @@ function paintEvalBar() {
       } else {
         const left = Math.min(pct, prevPct);
         deltaEl.hidden = false;
-        deltaEl.style.left = `${left.toFixed(2)}%`;
-        deltaEl.style.width = `${width.toFixed(2)}%`;
+        if (evalBarIsVertical()) {
+          deltaEl.style.left = "0";
+          deltaEl.style.width = "100%";
+          deltaEl.style.top = "auto";
+          deltaEl.style.bottom = `${left.toFixed(2)}%`;
+          deltaEl.style.height = `${width.toFixed(2)}%`;
+        } else {
+          deltaEl.style.bottom = "";
+          deltaEl.style.height = "100%";
+          deltaEl.style.top = "0";
+          deltaEl.style.left = `${left.toFixed(2)}%`;
+          deltaEl.style.width = `${width.toFixed(2)}%`;
+        }
         deltaEl.classList.toggle("is-up", dir === "up");
         deltaEl.classList.toggle("is-down", dir === "down");
       }
@@ -4517,6 +4567,7 @@ function syncAidButtons() {
   syncEvalBarHideDiffUi();
   syncEvalBarBlockOnlyUi();
   syncEvalBarStyleUi();
+  syncEvalBarPlaceUi();
   syncStoryIconsButton();
 }
 
@@ -4666,6 +4717,98 @@ function applyEvalBarStyle(value) {
     });
   }
   syncEvalBarStyleUi();
+  paintEvalBar();
+}
+
+function ensureCoachSide() {
+  const coach = document.querySelector(".coach-col");
+  if (!coach) return null;
+  let side = coach.querySelector(".coach-side");
+  if (!side) {
+    side = document.createElement("div");
+    side.className = "coach-side";
+    while (coach.firstChild) side.appendChild(coach.firstChild);
+    coach.appendChild(side);
+  }
+  let stack = side.querySelector(".coach-stack");
+  if (!stack) {
+    stack = document.createElement("div");
+    stack.className = "coach-stack";
+    [...side.children].forEach((child) => {
+      if (child !== stack && child.id !== "eval-bar") stack.appendChild(child);
+    });
+    side.appendChild(stack);
+  }
+  return side;
+}
+
+function layoutRightColumn() {
+  const side = ensureCoachSide();
+  const stack = side?.querySelector(".coach-stack");
+  if (!stack) return;
+  const banner = document.getElementById("turn-banner");
+  const dock = document.querySelector(".side-dock");
+  const graveTop = document.getElementById("grave-top");
+  const graveBottom = document.getElementById("grave-bottom");
+  const insertBeforeBanner = (node) => {
+    if (!node || node.parentElement === stack) return;
+    stack.insertBefore(node, banner && banner.parentElement === stack ? banner : stack.firstChild);
+  };
+  insertBeforeBanner(graveBottom);
+  insertBeforeBanner(graveTop);
+  insertBeforeBanner(dock);
+}
+
+function placeEvalBarDom() {
+  const bar = els.evalBar || document.getElementById("eval-bar");
+  const game = document.querySelector(".game");
+  const boardWrap = document.querySelector(".board-with-eval");
+  const side = ensureCoachSide();
+  const vertical = evalBarIsVertical();
+  game?.classList.toggle("is-eval-side", vertical);
+  game?.classList.toggle("is-eval-under", !vertical);
+  bar?.classList.toggle("is-vertical", vertical);
+  layoutRightColumn();
+  if (!bar) return;
+  if (vertical && side) {
+    side.insertBefore(bar, side.firstChild);
+  } else if (boardWrap) {
+    const preview = document.getElementById("board-move-preview");
+    if (preview) preview.insertAdjacentElement("afterend", bar);
+    else boardWrap.appendChild(bar);
+  }
+}
+
+function syncEvalBarPlaceUi() {
+  const on = evalBarIsVertical();
+  if (els.evalBarVertical) {
+    els.evalBarVertical.textContent = switchLabel(on);
+    els.evalBarVertical.classList.toggle("is-on", on);
+    els.evalBarVertical.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  if (els.evalBarPlace) els.evalBarPlace.value = on ? "side" : "under";
+}
+
+function fillEvalBarPlaceSelect() {
+  const select = els.evalBarPlace;
+  if (!select) return;
+  const current = evalBarIsVertical() ? "side" : "under";
+  select.innerHTML = [
+    `<option value="side"${current === "side" ? " selected" : ""}>${t("tools.evalBar.place.side")}</option>`,
+    `<option value="under"${current === "under" ? " selected" : ""}>${t("tools.evalBar.place.under")}</option>`,
+  ].join("");
+}
+
+function applyEvalBarPlace(value) {
+  state.evalBarPlace = value === "under" ? "under" : "side";
+  try {
+    localStorage.setItem(EVAL_BAR_PLACE_KEY, state.evalBarPlace);
+  } catch {
+    /* ignore */
+  }
+  if (els.evalBarScale) els.evalBarScale.dataset.barPlace = "";
+  placeEvalBarDom();
+  syncEvalBarPlaceUi();
   paintEvalBar();
 }
 
@@ -5078,6 +5221,8 @@ const els = {
   reviewArrowLabels: document.getElementById("btn-review-arrow-labels"),
   evalBarHideDiff: document.getElementById("btn-eval-bar-hide-diff"),
   evalBarBlockOnly: document.getElementById("btn-eval-bar-block-only"),
+  evalBarVertical: document.getElementById("btn-eval-bar-vertical"),
+  evalBarPlace: document.getElementById("eval-bar-place"),
   evalBarStyleBtn: document.getElementById("btn-eval-bar-style"),
   evalBarStyleList: document.getElementById("eval-bar-style-list"),
   evalBarStyleMenu: document.getElementById("eval-bar-style-menu"),
@@ -5186,6 +5331,7 @@ const state = {
   evalBarHideDiff: readEvalBarHideDiff(),
   evalBarBlockOnly: readEvalBarBlockOnly(),
   evalBarStyle: readEvalBarStyle(),
+  evalBarPlace: readEvalBarPlace(),
   aidTimer: null,
   aidToken: 0,
   flashToken: 0,
@@ -6998,6 +7144,7 @@ function openNewGameDialog(tab = "train") {
   fillRoundEvalSelect();
   fillEvalViewSelect();
   fillStoryIconsSelect();
+  fillEvalBarPlaceSelect();
   fillStartOpeningSelect();
   if (els.skill) els.skill.value = String(state.skill || 2);
   if (els.playColor) els.playColor.value = state.playColorPref || "random";
@@ -7305,6 +7452,7 @@ function applyLanguage() {
   fillRoundEvalSelect();
   fillEvalViewSelect();
   fillStoryIconsSelect();
+  fillEvalBarPlaceSelect();
   fillStartOpeningSelect();
   if (!els.newGame?.hidden) syncNewGameTabUi();
   renderKingLegend();
@@ -8098,6 +8246,8 @@ els.reviewArrows?.addEventListener("click", () => setReviewArrows(!state.reviewA
 els.reviewArrowLabels?.addEventListener("click", () => setReviewArrowLabels(!state.reviewArrowLabels));
 els.evalBarHideDiff?.addEventListener("click", () => setEvalBarHideDiff(!state.evalBarHideDiff));
 els.evalBarBlockOnly?.addEventListener("click", () => setEvalBarBlockOnly(!state.evalBarBlockOnly));
+els.evalBarVertical?.addEventListener("click", () => applyEvalBarPlace(evalBarIsVertical() ? "under" : "side"));
+els.evalBarPlace?.addEventListener("change", () => applyEvalBarPlace(els.evalBarPlace.value));
 els.evalBarStyleBtn?.addEventListener("click", (event) => {
   event.stopPropagation();
   toggleValueMenu(els.evalBarStyleList, els.evalBarStyleBtn, fillEvalBarStyleMenu);
@@ -8200,6 +8350,7 @@ document.addEventListener("pointerdown", (event) => {
 });
 
 applyStaticI18n();
+placeEvalBarDom();
 fillModeSelect();
 fillFriendWhereSelect();
 fillSkillSelect();
@@ -8210,6 +8361,7 @@ fillClockSelect();
 fillRoundEvalSelect();
 fillEvalViewSelect();
 fillStoryIconsSelect();
+fillEvalBarPlaceSelect();
 fillStartOpeningSelect();
 syncHintLayoutUi();
 syncAidButtons();

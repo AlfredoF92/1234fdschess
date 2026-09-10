@@ -1,6 +1,41 @@
 <div class="bmchess-root"><div class="page">
-    <main class="game">
+    <main class="game is-eval-side">
       <section class="board-col">
+        <div class="board-with-eval">
+          <div id="board-opp-preview" class="board-move-preview is-opp" hidden data-i18n-aria="board.preview.opp" aria-label="Anteprima delle mosse dell'avversario"></div>
+          <div class="board-stage">
+            <div id="board-root"></div>
+            <p id="board-pick-note" class="board-pick-note" hidden></p>
+          </div>
+          <div id="board-move-preview" class="board-move-preview" hidden data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite"></div>
+          <div id="opening-intro" class="opening-intro" hidden>
+            <div id="opening-intro-bar" class="opening-intro-bar" role="progressbar" data-i18n-aria="opening.intro.aria" aria-label="Caricamento della partita" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
+              <i id="opening-intro-fill"></i>
+            </div>
+            <p id="opening-intro-name" class="opening-intro-name"></p>
+            <p id="opening-intro-luck" class="opening-intro-luck" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="coach-col">
+        <div class="coach-side">
+          <div id="eval-bar" class="eval-bar is-blocks is-vertical" data-i18n-aria="eval.bar" aria-label="Valutazione della posizione" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div class="eval-bar-track" aria-hidden="true">
+              <div id="eval-bar-cells" class="eval-bar-cells"></div>
+              <i id="eval-bar-fill" class="eval-bar-fill"></i>
+              <i id="eval-bar-delta" class="eval-bar-delta" hidden></i>
+            </div>
+            <div id="eval-bar-scale" class="eval-bar-scale" aria-hidden="true"></div>
+            <div class="eval-bar-scores">
+              <span id="eval-bar-score" class="eval-bar-score">0</span>
+              <div id="eval-bar-prev-wrap" class="eval-bar-prev-wrap" hidden>
+                <span id="eval-bar-prev-label" class="eval-bar-prev-label" data-i18n="eval.bar.prev">Previous move</span>
+                <span id="eval-bar-prev" class="eval-bar-prev"></span>
+              </div>
+            </div>
+          </div>
+          <div class="coach-stack">
         <aside class="panel side-dock">
           <div class="card is-compact">
             <div class="dock-row">
@@ -44,40 +79,7 @@
           </div>
         </aside>
         <div id="grave-top" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
-        <div class="board-with-eval">
-          <div id="board-opp-preview" class="board-move-preview is-opp" hidden data-i18n-aria="board.preview.opp" aria-label="Anteprima delle mosse dell'avversario"></div>
-          <div class="board-stage">
-            <div id="board-root"></div>
-            <p id="board-pick-note" class="board-pick-note" hidden></p>
-          </div>
-          <div id="board-move-preview" class="board-move-preview" hidden data-i18n-aria="board.preview" aria-label="Anteprima delle mosse suggerite"></div>
-          <div id="eval-bar" class="eval-bar is-blocks" data-i18n-aria="eval.bar" aria-label="Valutazione della posizione" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-            <div class="eval-bar-track" aria-hidden="true">
-              <div id="eval-bar-cells" class="eval-bar-cells"></div>
-              <i id="eval-bar-fill" class="eval-bar-fill"></i>
-              <i id="eval-bar-delta" class="eval-bar-delta" hidden></i>
-            </div>
-            <div id="eval-bar-scale" class="eval-bar-scale" aria-hidden="true"></div>
-            <div class="eval-bar-scores">
-              <span id="eval-bar-score" class="eval-bar-score">0</span>
-              <div id="eval-bar-prev-wrap" class="eval-bar-prev-wrap" hidden>
-                <span id="eval-bar-prev-label" class="eval-bar-prev-label" data-i18n="eval.bar.prev">Previous move</span>
-                <span id="eval-bar-prev" class="eval-bar-prev"></span>
-              </div>
-            </div>
-          </div>
-          <div id="opening-intro" class="opening-intro" hidden>
-            <div id="opening-intro-bar" class="opening-intro-bar" role="progressbar" data-i18n-aria="opening.intro.aria" aria-label="Caricamento della partita" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0">
-              <i id="opening-intro-fill"></i>
-            </div>
-            <p id="opening-intro-name" class="opening-intro-name"></p>
-            <p id="opening-intro-luck" class="opening-intro-luck" hidden></p>
-          </div>
-        </div>
         <div id="grave-bottom" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
-      </section>
-
-      <section class="coach-col">
         <p id="turn-banner" class="turn-banner">Loading</p>
         <div class="king-talk">
           <div class="king-side">
@@ -151,6 +153,8 @@
         <div class="coach-tools">
           <button type="button" id="btn-quick-tools" class="coach-tools-open" data-i18n="tools.quick" aria-haspopup="dialog" aria-controls="quick-tools" aria-expanded="false">Impostazioni rapide</button>
         </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -221,6 +225,10 @@
           <div id="hint-overlay-list" class="style-menu-list" hidden role="menu"></div>
         </div>
         <h3 class="quick-tools-section" data-i18n="tools.evalBar">Barra di valutazione</h3>
+        <div class="coach-row">
+          <span class="coach-row-label" data-i18n="tools.evalBar.vertical">Barra verticale a destra</span>
+          <button type="button" id="btn-eval-bar-vertical" class="coach-switch is-on" aria-pressed="true" data-i18n-aria="tools.evalBar.verticalAria" aria-label="Mostra la barra di valutazione in verticale a destra">On</button>
+        </div>
         <div id="eval-bar-style-menu" class="coach-row style-menu is-drop-up">
           <span class="coach-row-label" data-i18n="tools.evalBar.style">Stile barra</span>
           <button type="button" id="btn-eval-bar-style" class="coach-switch coach-switch-value" aria-expanded="false" aria-haspopup="true" data-i18n-aria="tools.evalBar.styleAria" aria-label="Come mostrare la barra di valutazione">A blocchi</button>
@@ -424,6 +432,14 @@
           </select>
         </label>
         <p class="new-game-soon" data-i18n="settings.evalViewHint">Massima: quanto stai avanti o indietro dopo la mossa. Variazione: rispetto alla best di adesso. Prima della mossa avversaria: quanto recuperi o perdi rispetto a prima che lâ€™avversario muovesse. Variante con spada: stesso numero di quella variazione; i cuori e le spade sotto il Re restano rispetto a 0.</p>
+        <label class="skill-wrap">
+          <span data-i18n="tools.evalBar.place">Posizione barra</span>
+          <select id="eval-bar-place" data-i18n-aria="tools.evalBar.placeAria" aria-label="Dove mostrare la barra di valutazione">
+            <option value="side" selected>Verticale a destra</option>
+            <option value="under">Sotto la scacchiera</option>
+          </select>
+        </label>
+        <p class="new-game-soon" data-i18n="tools.evalBar.placeHint">Di default la barra è verticale a destra, così al centro restano solo scacchiera e caselle.</p>
         <label class="skill-wrap">
           <span data-i18n="settings.storyIcons">Stile cards</span>
           <select id="story-icons" data-i18n-aria="settings.storyIconsAria" aria-label="Stile delle carte delle mosse">

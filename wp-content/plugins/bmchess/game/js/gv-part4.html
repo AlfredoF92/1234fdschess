@@ -1,6 +1,3 @@
-="tablist" data-i18n-aria="tab.aria" aria-label="Section">
-        <button type="button" class="is-on" role="tab" id="tab-train" data-tab="train" aria-selected="true" aria-controls="panel-train" data-i18n="tab.train">Training</button>
-        <button type="button" role="tab" id="tab-online" data-tab="online" aria-selected="false" aria-controls="panel-online" data-i18n="tab.online">Play online</button>
         <button type="button" role="tab" id="tab-friend" data-tab="friend" aria-selected="false" aria-controls="panel-friend" data-i18n="tab.friend">Play with a friend</button>
         <button type="button" role="tab" id="tab-settings" data-tab="settings" aria-selected="false" aria-controls="panel-settings" data-i18n="tab.settings">Settings</button>
       </div>
@@ -97,4 +94,14 @@
           </label>
           <label class="skill-wrap" id="online-layout-row">
             <span data-i18n="hints.layout">Suggested moves</span>
-            <select id="online-layout" data-i18n-aria="hints.layoutAria" aria-label
+            <select id="online-layout" data-i18n-aria="hints.layoutAria" aria-label="Number of suggested moves">
+              <option value="6x1" selected>The 6 best moves</option>
+              <option value="4x1">The 4 best moves</option>
+              <option value="6x2">2 blocks of 6</option>
+              <option value="4x2">2 blocks of 4</option>
+            </select>
+          </label>
+          <button type="button" id="btn-online-create" class="is-primary online-create" data-i18n="online.create">Crea link</button>
+        </div>
+        <div id="online-share" hidden>
+          <p class="new-game-soon" data-i18n="online.shareHint">Invia questo link all’amico. Quando apre la pagina, la partita inizia.</p>

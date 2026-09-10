@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BMChess
  * Description: Gioco BM Chess in WordPress. Shortcode: [logo] [header-menu] [bm-chess-home]
- * Version: 1.2.8
+ * Version: 1.2.9
  * Author: BM Chess
  * Text Domain: bmchess
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BMCHESS_VERSION', '1.2.8' );
+define( 'BMCHESS_VERSION', '1.2.9' );
 define( 'BMCHESS_FILE', __FILE__ );
 define( 'BMCHESS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BMCHESS_URL', plugin_dir_url( __FILE__ ) );
@@ -140,16 +140,17 @@ function bmchess_print_game( $game_url ) {
 		return;
 	}
 	$html = '';
-	$full = BMCHESS_DIR . 'game/js/game-view.html';
-	if ( is_readable( $full ) && filesize( $full ) > 200 ) {
-		$html = file_get_contents( $full );
-	} else {
-		for ( $i = 1; $i <= 8; $i++ ) {
-			$part = BMCHESS_DIR . "game/js/gv-part{$i}.html";
-			if ( ! is_readable( $part ) || filesize( $part ) < 1 ) {
-				break;
-			}
-			$html .= file_get_contents( $part );
+	for ( $i = 1; $i <= 8; $i++ ) {
+		$part = BMCHESS_DIR . "game/js/gv-part{$i}.html";
+		if ( ! is_readable( $part ) || filesize( $part ) < 1 ) {
+			break;
+		}
+		$html .= file_get_contents( $part );
+	}
+	if ( $html === '' ) {
+		$full = BMCHESS_DIR . 'game/js/game-view.html';
+		if ( is_readable( $full ) && filesize( $full ) > 200 ) {
+			$html = file_get_contents( $full );
 		}
 	}
 	if ( $html ) {
