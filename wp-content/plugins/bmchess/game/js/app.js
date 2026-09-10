@@ -3361,8 +3361,10 @@ function renderBoardMovePreview() {
       const pickedCls = hint.uci === picked ? " is-picked" : "";
       const star = i === 0 ? `<span class="board-preview-star" aria-hidden="true">★</span>` : "";
       return `<button type="button" class="board-preview-item is-${kind}${pickedCls}" data-uci="${escapeHtml(hint.uci)}">
-        <span class="board-preview-place">${escapeHtml(formatPlace(i + 1))}${star}</span>
-        <span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>
+        <span class="board-preview-top">
+          <span class="board-preview-place">${escapeHtml(formatPlace(i + 1))}${star}</span>
+          <span class="board-preview-san">${escapeHtml(hintSan(hint))}</span>
+        </span>
         <span class="board-preview-eval">${previewEvalHtml(hint)}</span>
       </button>`;
     })

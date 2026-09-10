@@ -2,7 +2,7 @@
 /**
  * Plugin Name: BMChess
  * Description: Gioco BM Chess in WordPress. Shortcode: [logo] [header-menu] [bm-chess-home]
- * Version: 1.2.3
+ * Version: 1.2.4
  * Author: BM Chess
  * Text Domain: bmchess
  */
@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BMCHESS_VERSION', '1.2.3' );
+define( 'BMCHESS_VERSION', '1.2.4' );
 define( 'BMCHESS_FILE', __FILE__ );
 define( 'BMCHESS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BMCHESS_URL', plugin_dir_url( __FILE__ ) );
@@ -119,7 +119,8 @@ add_action(
 		if ( is_singular() && bmchess_post_needs_game_assets() ) {
 			bmchess_enqueue_assets();
 		}
-	}
+	},
+	100
 );
 
 add_filter(

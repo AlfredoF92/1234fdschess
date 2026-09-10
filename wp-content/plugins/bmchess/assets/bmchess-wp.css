@@ -32,9 +32,121 @@
 	box-sizing: border-box;
 }
 
+.bmchess-root {
+	--e-global-color-primary: #ececec;
+	--e-global-color-secondary: #9a9a9a;
+	--e-global-color-text: #ececec;
+	--e-global-color-accent: #7cb342;
+}
+
 .bmchess-root button,
 .bmchess-root select {
 	font: inherit;
+}
+
+body.bmchess-has-game .bmchess-root button,
+body.bmchess-has-game .bmchess-root button:hover,
+body.bmchess-has-game .bmchess-root button:focus,
+body.bmchess-has-game .bmchess-root button:active,
+.elementor .bmchess-root button,
+.elementor .bmchess-root button:hover {
+	appearance: none;
+	-webkit-appearance: none;
+	font-family: "Segoe UI", "Noto Sans", sans-serif !important;
+	text-transform: none !important;
+	letter-spacing: normal !important;
+	text-shadow: none !important;
+	box-shadow: none !important;
+	background-image: none !important;
+	outline-color: transparent;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-item,
+body.bmchess-has-game .bmchess-root .board-preview-item:hover,
+body.bmchess-has-game .bmchess-root .board-preview-item:focus,
+.elementor .bmchess-root .board-preview-item {
+	color: #ececec !important;
+	background-color: #1a1a1a !important;
+	border: 1px solid #3a3a3a !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-item.is-best,
+.elementor .bmchess-root .board-preview-item.is-best {
+	background-color: #1c2414 !important;
+	border-color: #9ccc65 !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-item.is-picked,
+body.bmchess-has-game .bmchess-root .board-preview-item.is-picked:hover,
+.elementor .bmchess-root .board-preview-item.is-picked {
+	color: #ececec !important;
+	background-color: #243018 !important;
+	border-color: #7cb342 !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-place,
+.elementor .bmchess-root .board-preview-place {
+	color: #b0b0b0 !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-item.is-best .board-preview-place,
+.elementor .bmchess-root .board-preview-item.is-best .board-preview-place {
+	color: #9ccc65 !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-san,
+.elementor .bmchess-root .board-preview-san {
+	color: #f2f2f2 !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-eval,
+.elementor .bmchess-root .board-preview-eval {
+	color: #c8e89a !important;
+}
+
+body.bmchess-has-game .bmchess-root .board-preview-eval .hint-eval-dir.is-down,
+body.bmchess-has-game .bmchess-root .board-preview-item.is-worst .board-preview-eval,
+.elementor .bmchess-root .board-preview-eval .hint-eval-dir.is-down {
+	color: #e07070 !important;
+}
+
+body.bmchess-has-game .bmchess-root .train-continue,
+body.bmchess-has-game .bmchess-root .train-continue:hover,
+.elementor .bmchess-root .train-continue {
+	color: #fff !important;
+	background-color: #629924 !important;
+	border: 1px solid #629924 !important;
+}
+
+body.bmchess-has-game .bmchess-root .coach-tools-open,
+body.bmchess-has-game .bmchess-root .coach-tools-open:hover,
+.elementor .bmchess-root .coach-tools-open {
+	color: #ececec !important;
+	background-color: #252525 !important;
+	border: 1px solid #2e2e2e !important;
+}
+
+body.bmchess-has-game .bmchess-root .app-menu-btn,
+body.bmchess-has-game .bmchess-root .quick-btn,
+.elementor .bmchess-root .app-menu-btn,
+.elementor .bmchess-root .quick-btn {
+	color: #ececec !important;
+	background-color: #1c1c1c !important;
+	border: 1px solid #2e2e2e !important;
+}
+
+body.bmchess-has-game .bmchess-root .quick-btn.is-primary,
+.elementor .bmchess-root .quick-btn.is-primary {
+	color: #fff !important;
+	background-color: #629924 !important;
+	border-color: #629924 !important;
+}
+
+body.bmchess-has-game .bmchess-root .quick-btn.is-on,
+.elementor .bmchess-root .quick-btn.is-on {
+	color: #d4f0b0 !important;
+	background-color: #243018 !important;
+	border-color: #7cb342 !important;
 }
 
 .bmchess-root .page {
