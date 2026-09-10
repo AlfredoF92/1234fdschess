@@ -50,6 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         </aside>
         <div id="grave-top" class="grave" data-i18n-aria="grave.aria" aria-label="Captured pieces"></div>
         <div class="board-with-eval">
+          <div id="board-opp-preview" class="board-move-preview is-opp" hidden data-i18n-aria="board.preview.opp" aria-label="Anteprima delle mosse dell'avversario"></div>
           <div class="board-stage">
             <div id="board-root"></div>
             <p id="board-pick-note" class="board-pick-note" hidden></p>

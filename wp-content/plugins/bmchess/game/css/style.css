@@ -396,6 +396,9 @@ body.is-opening-intro .board-move-preview {
   width: 100%;
   margin: 4px 0 0;
 }
+.board-move-preview.is-opp {
+  margin: 0 0 4px;
+}
 .board-move-preview[hidden] {
   display: none;
 }
